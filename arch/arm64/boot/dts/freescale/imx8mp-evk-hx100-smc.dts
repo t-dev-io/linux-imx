@@ -1,0 +1,75 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2019 NXP
+ */
+#include "imx8mp-evk.dts"
+
+/delete-node/ &reg_m2_3v3;
+/delete-node/ &lvds_bl_pwren;
+/{
+	reg_dsi_en: dsien {
+		compatible = "regulator-gpio";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_dsi_en>;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-name = "gpio_dvfs";
+		gpios = <&gpio4 22 GPIO_ACTIVE_LOW>;
+		states = <3300000 0x1 3300000 0x0>;
+		enable-active-low;
+		regulator-always-on;
+	};
+
+	reg_dsi_en2: dsien2 {
+		compatible = "regulator-gpio";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_dsi_en2>;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-name = "gpio_dvfs2";
+		gpios = <&gpio2 10 GPIO_ACTIVE_HIGH>;
+		states = <3300000 0x1 3300000 0x0>;
+		enable-active-high;
+		regulator-always-on;
+	};
+
+
+};
+
+&i2c1 {
+	adv_bridge: adv7535@3d {
+        pinctrl-0 = <&pinctrl_lvds>;
+        pd-gpios = <&gpio4 19 GPIO_ACTIVE_LOW>;
+	};
+
+};
+
+&i2c2 {
+	lvds_bridge: lvds-to-hdmi-bridge@4c {
+	/delete-property/ reset-gpios; 
+	};
+
+};
+
+&iomuxc {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_hog>,<&pinctrl_m2_5g>;
+
+	pinctrl_dsi_en2: dsi_en2grp {
+		fsl,pins = <
+			MX8MP_IOMUXC_SD1_RESET_B__GPIO2_IO10		0x19
+		>;
+	};
+
+	pinctrl_m2_5g: m2vgrp {
+		/delete-property/ fsl,pins; 
+		fsl,pins = <
+			MX8MP_IOMUXC_GPIO1_IO03__GPIO1_IO03		0x154
+			MX8MP_IOMUXC_NAND_DATA00__GPIO3_IO06	0x154
+			MX8MP_IOMUXC_NAND_DATA01__GPIO3_IO07	0x154
+			MX8MP_IOMUXC_NAND_DATA02__GPIO3_IO08	0x154
+			MX8MP_IOMUXC_NAND_DATA03__GPIO3_IO09	0x154
+			//MX8MP_IOMUXC_SD1_RESET_B__GPIO2_IO10	0x154
+		>;
+	};
+};
