@@ -871,9 +871,8 @@ static int mtk_spi_probe(struct platform_device *pdev)
 
 		if (master->cs_gpios) {
 			for (i = 0; i < master->num_chipselect; i++) {
-				ret = devm_gpio_request_one(&pdev->dev,
+				ret = devm_gpio_request(&pdev->dev,
 							master->cs_gpios[i],
-							GPIOF_OUT_INIT_LOW,
 							dev_name(&pdev->dev));
 				if (ret) {
 					dev_err(&pdev->dev,
@@ -901,6 +900,8 @@ static int mtk_spi_probe(struct platform_device *pdev)
 
 	return 0;
 
+out_spi_bitbang:
+	spi_bitbang_stop(&spi_imx->bitbang);
 err_disable_runtime_pm:
 	pm_runtime_disable(&pdev->dev);
 err_put_master:
