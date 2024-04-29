@@ -28,6 +28,7 @@
 
 #define DRIVER_NAME "spi_imx"
 
+int cs_gpio2;  
 static bool use_dma = true;
 module_param(use_dma, bool, 0644);
 MODULE_PARM_DESC(use_dma, "Enable usage of DMA when available (default)");
@@ -1156,6 +1157,26 @@ static const struct of_device_id spi_imx_dt_ids[] = {
 };
 MODULE_DEVICE_TABLE(of, spi_imx_dt_ids);
 
+static void spi_imx_chipselect(struct spi_device *spi, int is_active)
+{
+	int active = is_active != BITBANG_CS_INACTIVE;
+	int dev_is_lowactive = !(spi->mode & SPI_CS_HIGH);
+
+	if (spi->mode & SPI_NO_CS)
+		return;
+#if 0
+	if (!gpio_is_valid(spi->cs_gpio))
+		return;
+
+	gpio_set_value(spi->cs_gpio, dev_is_lowactive ^ active);
+#else
+	if (!gpio_is_valid(cs_gpio2))
+		return;
+
+	gpio_set_value(cs_gpio2, dev_is_lowactive ^ active);
+#endif
+}
+
 static void spi_imx_set_burst_len(struct spi_imx_data *spi_imx, int n_bits)
 {
 	u32 ctrl;
@@ -1674,6 +1695,15 @@ static int spi_imx_setup(struct spi_device *spi)
 	dev_dbg(&spi->dev, "%s: mode %d, %u bpw, %d hz\n", __func__,
 		 spi->mode, spi->bits_per_word, spi->max_speed_hz);
 
+	if (spi->mode & SPI_NO_CS)
+		return 0;
+
+	if (gpio_is_valid(spi->cs_gpio))
+		gpio_direction_output(spi->cs_gpio,
+				      spi->mode & SPI_CS_HIGH ? 0 : 1);
+
+	spi_imx_chipselect(spi, BITBANG_CS_INACTIVE);
+
 	return 0;
 }
 
@@ -1879,6 +1909,23 @@ static int spi_imx_probe(struct platform_device *pdev)
 	spi_imx->devtype_data->intctrl(spi_imx, 0);
 
 	master->dev.of_node = pdev->dev.of_node;
+	cs_gpio2 = of_get_named_gpio(np, "cs-gpios", 0);  
+	printk("spi cs_gpios2=%d",cs_gpio2);
+	if (gpio_is_valid(cs_gpio2))
+	{  
+		ret = devm_gpio_request_one(&pdev->dev,cs_gpio2, GPIOF_OUT_INIT_HIGH,  
+			"DRIVER_NAME");  
+		if (ret) 
+		{
+			pr_warn("failed to request cs_gpio2\n");  
+			goto out_clk_put;
+		}
+	}
+	else
+	{
+		printk("spi cs_gpios2 is not valid\r\n");
+		goto out_clk_put;
+	}
 	ret = spi_bitbang_start(&spi_imx->bitbang);
 	if (ret) {
 		dev_err_probe(&pdev->dev, ret, "bitbang start failed\n");
