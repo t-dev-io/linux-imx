@@ -21,10 +21,24 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_gpio_led>;
 
+#if 0
 		status {
 			label = "yellow:status";
 			gpios = <&gpio3 16 GPIO_ACTIVE_HIGH>;
 			default-state = "on";
+		};
+#endif
+
+		led2 {
+			label = "led2";
+			gpios = <&gpio2 8 GPIO_ACTIVE_HIGH>;
+			default-state = "off"; /* LED WIFI */
+		};
+
+		led3 {
+			label = "led3";
+			gpios = <&gpio4 0 GPIO_ACTIVE_HIGH>;
+			default-state = "off"; /* LED SYS */
 		};
 	};
 
@@ -255,16 +269,16 @@
 &flexcan1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexcan1>;
-	xceiver-supply = <&reg_can1_stby>;
+	// xceiver-supply = <&reg_can1_stby>;
 	status = "okay";
 };
 
 &flexcan2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexcan2>;
-	xceiver-supply = <&reg_can2_stby>;
-	pinctrl-assert-gpios = <&pca6416 3 GPIO_ACTIVE_HIGH>;
-	status = "disabled";/* can2 pin conflict with pdm */
+	// xceiver-supply = <&reg_can2_stby>;
+	// pinctrl-assert-gpios = <&pca6416 3 GPIO_ACTIVE_HIGH>;
+	status = "okay";/* can2 pin conflict with pdm */
 };
 
 &A53_0 {
@@ -435,6 +449,11 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c1>;
 	status = "okay";
+
+	rtc@68 {
+		compatible = "dallas,ds1337";
+		reg = <0x68>;
+	};
 
 	rt5640: rt5640@1c {
 		compatible = "realtek,rt5640";
@@ -788,7 +807,7 @@
 	assigned-clocks = <&clk IMX8MP_CLK_PDM>;
 	assigned-clock-parents = <&clk IMX8MP_AUDIO_PLL1_OUT>;
 	assigned-clock-rates = <196608000>;
-	status = "okay";
+	status = "disabled";
 };
 
 &pcie{
@@ -873,7 +892,7 @@
 	status = "okay";
 };
 
-&uart1 { /* BT */
+&uart1 { /* debug port */
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart1>;
 	assigned-clocks = <&clk IMX8MP_CLK_UART1>;
@@ -883,9 +902,10 @@
 };
 
 &uart2 {
-	/* console */
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart2>;
+	assigned-clocks = <&clk IMX8MP_CLK_UART2>;
+	assigned-clock-parents = <&clk IMX8MP_SYS_PLL1_80M>;
 	status = "okay";
 };
 
@@ -949,6 +969,15 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart3>;
 	assigned-clocks = <&clk IMX8MP_CLK_UART3>;
+	assigned-clock-parents = <&clk IMX8MP_SYS_PLL1_80M>;
+	// fsl,uart-has-rtscts;
+	status = "okay";
+};
+
+&uart4 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart4>;
+	assigned-clocks = <&clk IMX8MP_CLK_UART4>;
 	assigned-clock-parents = <&clk IMX8MP_SYS_PLL1_80M>;
 	fsl,uart-has-rtscts;
 	status = "okay";
@@ -1126,7 +1155,9 @@
 
 	pinctrl_gpio_led: gpioledgrp {
 		fsl,pins = <
-			MX8MP_IOMUXC_NAND_READY_B__GPIO3_IO16	0x19
+			// MX8MP_IOMUXC_NAND_READY_B__GPIO3_IO16	0x19
+			MX8MP_IOMUXC_SD1_DATA6__GPIO2_IO08	    0x19
+			MX8MP_IOMUXC_SAI1_RXFS__GPIO4_IO00 	    0x19
 		>;
 	};
 
@@ -1223,8 +1254,6 @@
 		fsl,pins = <
 			MX8MP_IOMUXC_UART1_RXD__UART1_DCE_RX	0x140
 			MX8MP_IOMUXC_UART1_TXD__UART1_DCE_TX	0x140
-			MX8MP_IOMUXC_UART3_RXD__UART1_DCE_CTS	0x140
-			MX8MP_IOMUXC_UART3_TXD__UART1_DCE_RTS	0x140
 		>;
 	};
 
@@ -1255,10 +1284,17 @@
 
 	pinctrl_uart3: uart3grp {
 		fsl,pins = <
-			MX8MP_IOMUXC_ECSPI1_SCLK__UART3_DCE_RX		0x140
-			MX8MP_IOMUXC_ECSPI1_MOSI__UART3_DCE_TX		0x140
-			MX8MP_IOMUXC_ECSPI1_SS0__UART3_DCE_RTS		0x140
-			MX8MP_IOMUXC_ECSPI1_MISO__UART3_DCE_CTS		0x140
+			MX8MP_IOMUXC_UART3_RXD__UART3_DCE_RX		0x140
+			MX8MP_IOMUXC_UART3_TXD__UART3_DCE_TX		0x140
+		>;
+	};
+
+	pinctrl_uart4: uart4grp {
+		fsl,pins = <
+			MX8MP_IOMUXC_ECSPI2_SS0__UART4_DCE_RTS		0x140
+			MX8MP_IOMUXC_ECSPI2_MOSI__UART4_DCE_TX		0x140
+			MX8MP_IOMUXC_ECSPI2_MISO__UART4_DCE_CTS		0x140
+			MX8MP_IOMUXC_ECSPI2_SCLK__UART4_DCE_RX		0x140
 		>;
 	};
 
