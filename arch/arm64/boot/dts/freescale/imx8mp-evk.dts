@@ -93,6 +93,7 @@
 		enable-active-high;
 	};
 
+#if 0
 	reg_audio_pwr: regulator-audio-pwr {
 		compatible = "regulator-fixed";
 		regulator-name = "audio-pwr";
@@ -102,12 +103,14 @@
 		enable-active-high;
 		regulator-always-on;
 	};
+#endif
 
 	bt_sco_codec: bt_sco_codec {
 		#sound-dai-cells = <1>;
 		compatible = "linux,bt-sco";
 	};
 
+#if 0
 	sound-bt-sco {
 		compatible = "simple-audio-card";
 		simple-audio-card,name = "bt-sco-audio";
@@ -126,6 +129,7 @@
 			sound-dai = <&bt_sco_codec 1>;
 		};
 	};
+#endif
 
 	sound-hdmi {
 		compatible = "fsl,imx-audio-hdmi";
@@ -142,25 +146,36 @@
 		status = "okay";
 	};
 
-	sound-wm8960 {
-		compatible = "fsl,imx-audio-wm8960";
-		model = "wm8960-audio";
+	sound-rt5640 {
+		compatible = "fsl,imx-audio-rt5640";
+		model = "rt5640-audio";
+		audio-codec = <&rt5640>;
 		audio-cpu = <&sai3>;
-		audio-codec = <&codec>;
-		audio-asrc = <&easrc>;
-		hp-det-gpio = <&gpio4 28 0>;
+		//  asrc-controller = <&asrc>;
 		audio-routing =
-			"Headphone Jack", "HP_L",
-			"Headphone Jack", "HP_R",
-			"Ext Spk", "SPK_LP",
-			"Ext Spk", "SPK_LN",
-			"Ext Spk", "SPK_RP",
-			"Ext Spk", "SPK_RN",
-			"LINPUT1", "Mic Jack",
-			"LINPUT3", "Mic Jack",
-			"Mic Jack", "MICB";
-	};
+			"Line Out Jack", "HPOL",
+			"Line Out Jack", "HPOR",
+			"IN2N", "Line In Jack",
+			"IN2P", "Line In Jack";
+			// "Stereo ADC L1 Mux","IN1P",
+#if 0
+			"AIF1 Playback", "CPU-Playback",
+			"CPU-Capture", "AIF1 Capture";
+			"Headphone Jack", "HPOL",
+			"Headphone Jack", "HPOR",
+			"Ext Spk", "HPOL",
+			"Ext Spk", "HPOR",
+			"IN1P", "DMIC",
+			"IN2P", "DMIC",
+			"AIF1 Playback", "CPU-Playback",
+			"CPU-Capture", "AIF1 Capture";
+		mux-int-port = <2>;
+		mux-ext-port = <3>;
+		// mic-det-gpios = <&gpio1 2 0>;
+#endif
+   };
 
+#if 0
 	sound-micfil {
 		compatible = "fsl,imx-audio-card";
 		model = "imx-audio-micfil";
@@ -172,6 +187,7 @@
 			};
 		};
 	};
+#endif
 
 	sound-xcvr {
 		compatible = "fsl,imx-audio-card";
@@ -252,7 +268,7 @@
 };
 
 &A53_0 {
-	cpu-supply = <&buck2>;
+	// cpu-supply = <&buck2>;
 };
 
 &A53_1 {
@@ -420,6 +436,21 @@
 	pinctrl-0 = <&pinctrl_i2c1>;
 	status = "okay";
 
+	rt5640: rt5640@1c {
+		compatible = "realtek,rt5640";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_codec_int_b>;
+		reg = <0x1c>;
+		clocks = <&audiomix_clk IMX8MP_CLK_AUDIOMIX_SAI3_MCLK1>;
+		clock-names = "mclk";
+		interrupt-parent = <&gpio4>;
+		interrupts = <29 GPIO_ACTIVE_LOW>;
+		//PWENB-supply = <&reg_audio>;
+		amic-mono;
+		status = "okay";
+	};
+
+#if 0
 	pmic@25 {
 		compatible = "nxp,pca9450c";
 		reg = <0x25>;
@@ -514,6 +545,7 @@
 			};
 		};
 	};
+#endif
 };
 
 &i2c2 {
@@ -631,6 +663,7 @@
 		#gpio-cells = <2>;
 	};
 
+#if 0
 	codec: wm8960@1a {
 		compatible = "wlf,wm8960";
 		reg = <0x1a>;
@@ -641,6 +674,7 @@
 		wlf,gpio-cfg = <1 3>;
 		SPKVDD1-supply = <&reg_audio_pwr>;
 	};
+#endif
 
 	ov5640_1: ov5640_mipi@3c {
 		compatible = "ovti,ov5640";
@@ -1123,6 +1157,12 @@
 		>;
 	};
 
+	pinctrl_codec_int_b: codec_int_bgrp {
+		fsl,pins = <
+			MX8MP_IOMUXC_SAI3_RXC__GPIO4_IO29	0x16
+		>;
+	};
+
 	pinctrl_pcie: pciegrp {
 		fsl,pins = <
 			MX8MP_IOMUXC_I2C4_SCL__PCIE_CLKREQ_B		0x61 /* open drain, pull up */
@@ -1171,7 +1211,6 @@
 			MX8MP_IOMUXC_SAI3_TXD__AUDIOMIX_SAI3_TX_DATA00	0xd6
 			MX8MP_IOMUXC_SAI3_MCLK__AUDIOMIX_SAI3_MCLK	0xd6
 			MX8MP_IOMUXC_SAI3_RXFS__GPIO4_IO28		0xd6
-			MX8MP_IOMUXC_SAI3_RXC__GPIO4_IO29		0xd6
 		>;
 	};
 

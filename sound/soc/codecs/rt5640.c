@@ -164,6 +164,60 @@ static const struct reg_default rt5640_reg[] = {
 	{ 0xff, 0x6231 },
 };
 
+#define RT5640_REG_DISP_LEN 23
+
+/**
+ * rt5640_index_write - Write private register.
+ * @codec: SoC audio codec device.
+ * @reg: Private register index.
+ * @value: Private register Data.
+ *
+ * Modify private register for advanced setting. It can be written through
+ * private index (0x6a) and data (0x6c) register.
+ *
+ * Returns 0 for success or negative error code.
+ */
+static int rt5640_index_write(struct snd_soc_component *component,
+		unsigned int reg, unsigned int value)
+{
+	int ret;
+
+	ret = snd_soc_component_write(component, RT5640_PRIV_INDEX, reg);
+	if (ret < 0) {
+		printk( "Failed to set private addr: %d\n", ret);
+		goto err;
+	}
+	ret = snd_soc_component_write(component, RT5640_PRIV_DATA, value);
+	if (ret < 0) {
+		printk( "Failed to set private value: %d\n", ret);
+		goto err;
+	}
+	return 0;
+
+err:
+	return ret;
+}
+
+
+/**
+ * rt5640_index_read - Read private register.
+ * @codec: SoC audio codec device.
+ * @reg: Private register index.
+ *
+ * Read advanced setting from private register. It can be read through
+ * private index (0x6a) and data (0x6c) register.
+ *
+ * Returns private register value or negative error code.
+ */
+static unsigned int rt5640_index_read(
+	struct snd_soc_component *component, unsigned int reg)
+{
+	int ret;
+
+	snd_soc_component_write(component, RT5640_PRIV_INDEX, reg);
+	return snd_soc_component_read32(component, RT5640_PRIV_DATA);
+}
+
 static int rt5640_reset(struct snd_soc_component *component)
 {
 	return snd_soc_component_write(component, RT5640_RESET, 0);
@@ -924,8 +978,8 @@ static void hp_amp_power_on(struct snd_soc_component *component)
 	regmap_update_bits(rt5640->regmap, RT5640_DEPOP_M2,
 		RT5640_DEPOP_MASK, RT5640_DEPOP_MAN);
 	regmap_update_bits(rt5640->regmap, RT5640_DEPOP_M1,
-		RT5640_HP_CP_MASK | RT5640_HP_SG_MASK | RT5640_HP_CB_MASK,
-		RT5640_HP_CP_PU | RT5640_HP_SG_DIS | RT5640_HP_CB_PU);
+		RT5640_HP_CO_MASK| RT5640_HP_CP_MASK | RT5640_HP_SG_MASK | RT5640_HP_CB_MASK,
+		RT5640_HP_CO_EN | RT5640_HP_CP_PU | RT5640_HP_SG_DIS | RT5640_HP_CB_PU);
 	regmap_write(rt5640->regmap, RT5640_PR_BASE + RT5640_HP_DCC_INT1,
 			   0x9f00);
 	/* headphone amp power on */
@@ -1838,8 +1892,9 @@ static int rt5640_set_dai_sysclk(struct snd_soc_dai *dai,
 	unsigned int reg_val = 0;
 	unsigned int pll_bit = 0;
 
-	if (freq == rt5640->sysclk && clk_id == rt5640->sysclk_src)
-		return 0;
+	// jiangyaqiang:remove it ,because if no, pll will power down after enter standby mode
+	// if (freq == rt5640->sysclk && clk_id == rt5640->sysclk_src)
+	// 	return 0;
 
 	switch (clk_id) {
 	case RT5640_SCLK_S_MCLK:
@@ -2489,6 +2544,164 @@ static int rt5640_set_jack(struct snd_soc_component *component,
 	return 0;
 }
 
+/**
+ * rt5640_index_show - Dump private registers.
+ * @dev: codec device.
+ * @attr: device attribute.
+ * @buf: buffer for display.
+ *
+ * To show non-zero values of all private registers.
+ *
+ * Returns buffer length.
+ */
+static ssize_t rt5640_index_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	struct rt5640_priv *rt5640 = i2c_get_clientdata(client);
+	struct snd_soc_component *component = rt5640->component;
+	unsigned int val;
+	int cnt = 0, i;
+
+	cnt += sprintf(buf, "RT5640 index register\n");
+	for (i = 0; i < 0xb4; i++) {
+		if (cnt + RT5640_REG_DISP_LEN >= PAGE_SIZE)
+			break;
+		val = rt5640_index_read(component, i);
+		if (!val)
+			continue;
+		cnt += snprintf(buf + cnt, RT5640_REG_DISP_LEN,
+				"%02x: %04x\n", i, val);
+	}
+
+	if (cnt >= PAGE_SIZE)
+		cnt = PAGE_SIZE - 1;
+
+	return cnt;
+}
+
+static ssize_t rt5640_index_store(struct device *dev,
+				  struct device_attribute *attr,
+				  const char *buf, size_t count)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	struct rt5640_priv *rt5640 = i2c_get_clientdata(client);
+	struct snd_soc_component *component = rt5640->component;
+	unsigned int val = 0, addr = 0;
+	int i;
+
+	printk("register \"%s\" count=%d\n", buf, count);
+	for (i = 0; i < count; i++) {
+		if (*(buf + i) <= '9' && *(buf + i) >= '0')
+			addr = (addr << 4) | (*(buf + i) - '0');
+		else if (*(buf + i) <= 'f' && *(buf + i) >= 'a')
+			addr = (addr << 4) | ((*(buf + i) - 'a') + 0xa);
+		else if (*(buf + i) <= 'F' && *(buf + i) >= 'A')
+			addr = (addr << 4) | ((*(buf + i) - 'A') + 0xa);
+		else
+			break;
+	}
+
+	for (i = i + 1; i < count; i++) {
+		if (*(buf + i) <= '9' && *(buf + i) >= '0')
+			val = (val << 4) | (*(buf + i) - '0');
+		else if (*(buf + i) <= 'f' && *(buf + i) >= 'a')
+			val = (val << 4) | ((*(buf + i) - 'a') + 0xa);
+		else if (*(buf + i) <= 'F' && *(buf + i) >= 'A')
+			val = (val << 4) | ((*(buf + i) - 'A') + 0xa);
+		else
+			break;
+	}
+	printk("addr=0x%x val=0x%x\n", addr, val);
+	if (addr > RT5640_VENDOR_ID2 || val > 0xffff || val < 0)
+		return count;
+
+	if (i == count) {
+		printk("0x%02x = 0x%04x\n", addr,
+			 rt5640_index_read(component, addr));
+	} else {
+		rt5640_index_write(component, addr, val);
+	}
+
+	return count;
+}
+static DEVICE_ATTR(index_reg, 0664, rt5640_index_show, rt5640_index_store);
+
+static ssize_t rt5640_codec_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	struct rt5640_priv *rt5640 = i2c_get_clientdata(client);
+	struct snd_soc_component *component = rt5640->component;
+	unsigned int val;
+	int cnt = 0, i;
+
+	cnt += sprintf(buf, "RT5640 codec register\n");
+	for (i = 0; i <= RT5640_VENDOR_ID2; i++) {
+		if (cnt + RT5640_REG_DISP_LEN >= PAGE_SIZE)
+			break;
+		if (rt5640_readable_register(dev, i)) {
+			val = snd_soc_component_read32(component, i);
+
+			cnt += snprintf(buf + cnt, RT5640_REG_DISP_LEN,
+					"%04x: %04x\n", i, val);
+		}
+	}
+	if (cnt >= PAGE_SIZE)
+		cnt = PAGE_SIZE - 1;
+
+	return cnt;
+}
+
+static ssize_t rt5640_codec_store(struct device *dev,
+				  struct device_attribute *attr,
+				  const char *buf, size_t count)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	struct rt5640_priv *rt5640 = i2c_get_clientdata(client);
+	unsigned int val = 0, addr = 0;
+	struct snd_soc_component *component = rt5640->component;
+	int i;
+
+	printk("register \"%s\" count=%d\n", buf, count);
+	for (i = 0; i < count; i++) {	/*address */
+		if (*(buf + i) <= '9' && *(buf + i) >= '0')
+			addr = (addr << 4) | (*(buf + i) - '0');
+		else if (*(buf + i) <= 'f' && *(buf + i) >= 'a')
+			addr = (addr << 4) | ((*(buf + i) - 'a') + 0xa);
+		else if (*(buf + i) <= 'F' && *(buf + i) >= 'A')
+			addr = (addr << 4) | ((*(buf + i) - 'A') + 0xa);
+		else
+			break;
+	}
+
+	for (i = i + 1; i < count; i++) {
+		if (*(buf + i) <= '9' && *(buf + i) >= '0')
+			val = (val << 4) | (*(buf + i) - '0');
+		else if (*(buf + i) <= 'f' && *(buf + i) >= 'a')
+			val = (val << 4) | ((*(buf + i) - 'a') + 0xa);
+		else if (*(buf + i) <= 'F' && *(buf + i) >= 'A')
+			val = (val << 4) | ((*(buf + i) - 'A') + 0xa);
+		else
+			break;
+	}
+	printk("addr=0x%x val=0x%x\n", addr, val);
+	if (addr > RT5640_VENDOR_ID2 || val > 0xffff || val < 0)
+		return count;
+
+	if (i == count) {
+		printk("0x%02x = 0x%04x\n", addr,
+		snd_soc_component_read32(component, addr));
+		//codec->hw_read(codec, addr));
+	} else {
+		snd_soc_component_write(component, addr, val);
+	}
+
+	return count;
+}
+
+static DEVICE_ATTR(codec_reg, 0664, rt5640_codec_show, rt5640_codec_store);
+
 static int rt5640_probe(struct snd_soc_component *component)
 {
 	struct snd_soc_dapm_context *dapm = snd_soc_component_get_dapm(component);
@@ -2840,7 +3053,11 @@ static int rt5640_i2c_probe(struct i2c_client *i2c,
 	if (val != RT5640_DEVICE_ID) {
 		dev_err(&i2c->dev,
 			"Device with ID register %#x is not rt5640/39\n", val);
-		return -ENODEV;
+		regmap_read(rt5640->regmap, RT5640_VENDOR_ID2, &val);
+		if (val != RT5640_DEVICE_ID) {
+			dev_err(&i2c->dev,
+				"read again Device with ID register %#x is not rt5640/39\n", val);
+		}
 	}
 
 	regmap_write(rt5640->regmap, RT5640_RESET, 0);
@@ -2862,6 +3079,20 @@ static int rt5640_i2c_probe(struct i2c_client *i2c,
 	ret = devm_add_action_or_reset(&i2c->dev, rt5640_cancel_work, rt5640);
 	if (ret)
 		return ret;
+
+	ret = device_create_file(&i2c->dev, &dev_attr_index_reg);
+	if (ret != 0) {
+		dev_err(&i2c->dev,
+			"Failed to create index_reg sysfs files: %d\n", ret);
+		return ret;
+	}
+	
+	ret = device_create_file(&i2c->dev, &dev_attr_codec_reg);
+	if (ret != 0) {
+		dev_err(&i2c->dev,
+			"Failed to create codex_reg sysfs files: %d\n", ret);
+		return ret;
+	}
 
 	return devm_snd_soc_register_component(&i2c->dev,
 				      &soc_component_dev_rt5640,
