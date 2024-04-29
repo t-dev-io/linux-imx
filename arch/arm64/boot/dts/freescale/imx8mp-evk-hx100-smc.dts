@@ -34,7 +34,28 @@
 		regulator-always-on;
 	};
 
+	gpio-keys {
+		compatible = "gpio-keys";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_gpio_keys>;
 
+		sleep {
+			label = "SleepButton";
+			gpios = <&gpio2 5 1>;
+			linux,code = <KEY_SLEEP>;
+			gpio-key,wakeup;
+			wakeup-source;
+			status = "okay";
+		};
+
+		lid {
+			label = "LidButton";
+			gpios = <&gpio2 1 1>;
+			linux,code = <KEY_WAKEUP>;
+			wakeup-source;
+			status = "okay";
+		};
+	};
 };
 
 &i2c1 {
@@ -104,14 +125,10 @@
 			MX8MP_IOMUXC_HDMI_CEC__HDMIMIX_HDMI_CEC		0x40000019
 
 			MX8MP_IOMUXC_SD1_CLK__GPIO2_IO00					0x19
-			MX8MP_IOMUXC_SD1_CMD__GPIO2_IO01					0x19
 			MX8MP_IOMUXC_SD1_DATA0__GPIO2_IO02				0x19
 			MX8MP_IOMUXC_SD1_DATA1__GPIO2_IO03				0x19
 			MX8MP_IOMUXC_SD1_DATA2__GPIO2_IO04				0x19
-			MX8MP_IOMUXC_SD1_DATA3__GPIO2_IO05				0x19
 			MX8MP_IOMUXC_SD1_DATA4__GPIO2_IO06				0x19
-			// MX8MP_IOMUXC_SD1_DATA5__GPIO2_IO07			0x19
-			// MX8MP_IOMUXC_SAI1_TXD6__GPIO4_IO18			0x19
 			MX8MP_IOMUXC_SAI2_RXFS__GPIO4_IO21				0x19
 			MX8MP_IOMUXC_SAI2_MCLK__GPIO4_IO27				0x19
 		>;
@@ -191,4 +208,15 @@
 	};
 
 	/delete-node/ pinctrl_csi1_mclk; 
+
+	pinctrl_gpio_keys: gpiokeysgrp {
+		fsl,pins = <
+			MX8MP_IOMUXC_SD1_DATA3__GPIO2_IO05     0x19 //SLEEP_B
+			MX8MP_IOMUXC_SD1_CMD__GPIO2_IO01       0x19 //LID_B
+		>;
+	};
+
+	/delete-node/ pinctrl_usdhc1; 
+	/delete-node/ pinctrl_usdhc1_100mhz; 
+	/delete-node/ pinctrl_usdhc1_200mhz; 
 };
