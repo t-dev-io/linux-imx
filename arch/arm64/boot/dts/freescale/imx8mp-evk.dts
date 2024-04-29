@@ -101,6 +101,7 @@
 		regulator-always-on;
 	};
 
+#if 0
 	reg_otg1pwr: regulator-otg1pwr {
 		compatible = "regulator-fixed";
 		regulator-name = "otg1pwr";
@@ -113,6 +114,7 @@
 		regulator-boot-on;
 		regulator-always-on;
 	};
+#endif
 
 	reg_can1_stby: regulator-can1-stby {
 		compatible = "regulator-fixed";
@@ -280,6 +282,14 @@
 				     90 91 92 93 94 95 96 97 98 99
 				    100>;
 		default-brightness-level = <80>;
+	};
+
+	usb_id: usb-id {
+		compatible = "linux,extcon-usb-gpio";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_otg1pwr>;
+		id-gpio = <&gpio1 10 GPIO_ACTIVE_LOW>;
+		vbus-power-gpio = <&gpio1 12 GPIO_ACTIVE_HIGH>;
 	};
 
 #if 0
@@ -938,18 +948,16 @@
 };
 
 &usb_dwc3_0 {
-#if 1
+#if 0
 	dr_mode = "host";
 	//test host only, always enable regulator otg1pwr, if need otg use gpio extcon instand
 #else
 	dr_mode = "otg";
-	hnp-disable;
-	srp-disable;
-	adp-disable;
-	usb-role-switch;
-	role-switch-default-mode = "none";
-	snps,dis-u1-entry-quirk;
-	snps,dis-u2-entry-quirk;
+	extcon = <&usb_id>;
+//	hnp-disable;
+//	srp-disable;
+//	adp-disable;
+//	usb-role-switch;
 #endif
 	status = "okay";
 
@@ -1157,6 +1165,7 @@
 		fsl,pins = <
 			MX8MP_IOMUXC_GPIO1_IO13__GPIO1_IO13	0x154	
 			MX8MP_IOMUXC_GPIO1_IO12__GPIO1_IO12	0x154
+			MX8MP_IOMUXC_GPIO1_IO10__GPIO1_IO10	0x150		/*USBOTG1_ID*/
 		>;
 	};
 
