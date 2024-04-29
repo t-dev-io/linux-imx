@@ -4122,6 +4122,30 @@ static const struct drm_display_mode sharp_ls020b1dd01d_modes[] = {
 	},
 };
 
+static const struct display_timing sharp_lq150x1lx95_timing = {
+	.pixelclock = { 60000000, 65000000, 65000000 },
+	.hactive = { 1024, 1024, 1024 },
+	.hfront_porch = { 24, 24, 24 },
+	.hback_porch = { 320, 320, 320 },
+	.hsync_len = { 136, 136, 136 },
+	.vactive = { 768, 768, 768},
+	.vfront_porch = { 3, 3, 3 },
+	.vback_porch = { 38, 38, 38 },
+	.vsync_len = { 6, 6, 6 },
+	.flags = DISPLAY_FLAGS_DE_HIGH,
+};
+
+static const struct panel_desc sharp_lq150x1lx95 = {
+	.timings = &sharp_lq150x1lx95_timing,
+	.num_timings = 1,
+	.bpc = 6,
+	.size = {
+		.width = 304,
+		.height = 228,
+	},
+	.bus_format = MEDIA_BUS_FMT_RGB565_1X16,
+};
+
 static const struct panel_desc sharp_ls020b1dd01d = {
 	.modes = sharp_ls020b1dd01d_modes,
 	.num_modes = ARRAY_SIZE(sharp_ls020b1dd01d_modes),
@@ -4933,6 +4957,9 @@ static const struct of_device_id platform_of_match[] = {
 	}, {
 		.compatible = "sharp,lq101k1ly04",
 		.data = &sharp_lq101k1ly04,
+	}, {
+		.compatible = "sharp,lq150x1lx95",
+		.data = &sharp_lq150x1lx95,
 	}, {
 		.compatible = "sharp,lq123p1jx31",
 		.data = &sharp_lq123p1jx31,

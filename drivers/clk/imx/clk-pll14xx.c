@@ -57,6 +57,10 @@ static const struct imx_pll14xx_rate_table imx_pll1416x_tbl[] = {
 
 static const struct imx_pll14xx_rate_table imx_pll1443x_tbl[] = {
 	PLL_1443X_RATE(1039500000U, 173, 2, 1, 16384),
+	PLL_1443X_RATE(1092000000U, 546, 6, 1, 0),       //pixel_clk=78Mhz*2
+	PLL_1443X_RATE(1039500000U, 173, 2, 1, 16384),   //pixel_clk=74.25Mhz*2
+	PLL_1443X_RATE(980000000U, 490, 6, 1, 0),        //pixel_clk=70Mhz*2
+	PLL_1443X_RATE(910000000U, 455, 6, 1, 0),        //pixel_clk=65Mhz*2
 	PLL_1443X_RATE(650000000U, 325, 3, 2, 0),
 	PLL_1443X_RATE(594000000U, 198, 2, 2, 0),
 	PLL_1443X_RATE(519750000U, 173, 2, 2, 16384),
