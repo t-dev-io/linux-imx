@@ -79,7 +79,12 @@
 
     };
 
-
+	can0_osc: clock-ext5 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency= <20000000>;
+		clock-output-names = "clk_ext5";
+	};
 };
 
 &i2c1 {
@@ -114,14 +119,14 @@
 &eqos {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_eqos>;
-    phy-reset-gpios = <&gpio4 18 GPIO_ACTIVE_LOW>;
+  // phy-reset-gpios = <&gpio4 18 GPIO_ACTIVE_LOW>;
 	status = "okay";
 };
 
 &fec {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_fec>;
-    phy-reset-gpios = <&gpio4 27 GPIO_ACTIVE_LOW>;
+  // phy-reset-gpios = <&gpio4 27 GPIO_ACTIVE_LOW>;
 	status = "okay";
 };
 
