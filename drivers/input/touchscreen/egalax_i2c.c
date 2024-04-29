@@ -916,6 +916,15 @@ static int __devinit egalax_i2c_probe(struct i2c_client *client, const struct i2
 	register_early_suspend(&egalax_early_suspend);
 	EGALAX_DBG(DBG_MODULE, " Register early_suspend done\n");
 #endif
+	ret = egalax_i2c_measure(p_egalax_i2c_dev);
+	if(ret == -1)
+	{
+		ret = egalax_i2c_measure(p_egalax_i2c_dev);
+		if(ret == -1)
+		{
+			goto fail3;
+		}
+	}
 
 	EGALAX_DBG(DBG_MODULE, " I2C probe done\n");
 	return 0;
