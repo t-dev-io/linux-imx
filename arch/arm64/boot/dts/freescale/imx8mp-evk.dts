@@ -13,7 +13,7 @@
 	compatible = "fsl,imx8mp-evk", "fsl,imx8mp";
 
 	chosen {
-		stdout-path = &uart2;
+		stdout-path = &uart1;
 	};
 
 	gpio-leds {
@@ -195,7 +195,7 @@
 &flexspi {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexspi0>;
-	status = "okay";
+	status = "disabled";
 
 	flash0: mt25qu256aba@0 {
 		reg = <0>;
@@ -286,6 +286,7 @@
 	pinctrl-0 = <&pinctrl_eqos>;
 	phy-mode = "rgmii-id";
 	phy-handle = <&ethphy0>;
+	phy-reset-gpios = <&gpio3 0 GPIO_ACTIVE_LOW>;
 	snps,force_thresh_dma_mode;
 	snps,mtl-tx-config = <&mtl_tx_setup>;
 	snps,mtl-rx-config = <&mtl_rx_setup>;
@@ -364,6 +365,7 @@
 	pinctrl-0 = <&pinctrl_fec>;
 	phy-mode = "rgmii-id";
 	phy-handle = <&ethphy1>;
+	phy-reset-gpios = <&gpio3 1 GPIO_ACTIVE_LOW>;
 	fsl,magic-packet;
 	status = "okay";
 
@@ -976,6 +978,8 @@
 			MX8MP_IOMUXC_ENET_TX_CTL__ENET_QOS_RGMII_TX_CTL			0x1f
 			MX8MP_IOMUXC_ENET_TXC__CCM_ENET_QOS_CLOCK_GENERATE_TX_CLK	0x1f
 			MX8MP_IOMUXC_SAI2_RXC__GPIO4_IO22				0x19
+			MX8MP_IOMUXC_NAND_ALE__GPIO3_IO00				0x19
+			MX8MP_IOMUXC_GPIO1_IO09__GPIO1_IO09			0x19
 		>;
 	};
 
@@ -996,6 +1000,8 @@
 			MX8MP_IOMUXC_SAI1_TXD4__ENET1_RGMII_TX_CTL	0x1f
 			MX8MP_IOMUXC_SAI1_TXD5__ENET1_RGMII_TXC		0x1f
 			MX8MP_IOMUXC_SAI1_RXD0__GPIO4_IO02		0x19
+			MX8MP_IOMUXC_NAND_CE0_B__GPIO3_IO01		0x19
+			MX8MP_IOMUXC_GPIO1_IO05__GPIO1_IO05		0x19
 		>;
 	};
 
@@ -1027,8 +1033,6 @@
 
 	pinctrl_flexspi0: flexspi0grp {
 		fsl,pins = <
-			MX8MP_IOMUXC_NAND_ALE__FLEXSPI_A_SCLK           0x1c2
-			MX8MP_IOMUXC_NAND_CE0_B__FLEXSPI_A_SS0_B        0x82
 			MX8MP_IOMUXC_NAND_DATA00__FLEXSPI_A_DATA00      0x82
 			MX8MP_IOMUXC_NAND_DATA01__FLEXSPI_A_DATA01      0x82
 			MX8MP_IOMUXC_NAND_DATA02__FLEXSPI_A_DATA02      0x82
@@ -1123,7 +1127,6 @@
 
 	pinctrl_i2c2_synaptics_dsx_io: synaptics_dsx_iogrp {
 		fsl,pins = <
-			MX8MP_IOMUXC_GPIO1_IO09__GPIO1_IO09		0x16
 		>;
 	};
 
