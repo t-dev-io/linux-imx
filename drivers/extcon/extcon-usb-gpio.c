@@ -66,24 +66,25 @@ static void usb_extcon_detect_cable(struct work_struct *work)
 						    struct usb_extcon_info,
 						    wq_detcable);
 
-	printk("function:%s line:%d id:%d  \n",__FUNCTION__,__LINE__,id);
 	/* check ID and VBUS and update cable state */
 	id = info->id_gpiod ?
 		gpiod_get_value_cansleep(info->id_gpiod) : 1;
 	vbus = info->vbus_gpiod ?
 		gpiod_get_value_cansleep(info->vbus_gpiod) : id;
 
+	printk("function:%s line:%d id:%d  \n",__FUNCTION__,__LINE__,id);
 	/* at first we clean states which are no longer active */
-	if (!id){
+	if (id){
 		extcon_set_state_sync(info->edev, EXTCON_USB_HOST, false);
 		if(info->vbus_power) {
 				printk("function:%s line:%d id:%d  \n",__FUNCTION__,__LINE__,id);
-			gpiod_set_value(info->vbus_power, 0);
+			gpiod_set_value(info->vbus_power, 1);
 		}
 	} else {
+		extcon_set_state_sync(info->edev, EXTCON_USB, false);
 		if(info->vbus_power) {
 			printk("function:%s line:%d id:%d  \n",__FUNCTION__,__LINE__,id);
-			gpiod_set_value(info->vbus_power, 1);
+			gpiod_set_value(info->vbus_power, 0);
 		}
 	}
 
@@ -92,11 +93,12 @@ static void usb_extcon_detect_cable(struct work_struct *work)
 	if (!vbus)
 		extcon_set_state_sync(info->edev, EXTCON_USB, false);
 
-	if (id) {
+	if (!id) {
+		printk("function:%s line:%d \n",__FUNCTION__,__LINE__);
 		extcon_set_state_sync(info->edev, EXTCON_USB_HOST, true);
 	} else {
-		if (vbus)
-			extcon_set_state_sync(info->edev, EXTCON_USB, true);
+		printk("function:%s line:%d \n",__FUNCTION__,__LINE__);
+		extcon_set_state_sync(info->edev, EXTCON_USB, true);
 	}
 }
 
@@ -131,21 +133,17 @@ static int usb_extcon_probe(struct platform_device *pdev)
 
 	info->vbus_power = devm_gpiod_get_optional(&pdev->dev, "vbus-power",
 						   			GPIOD_OUT_LOW);
-	printk("function:%s line:%d \n",__FUNCTION__,__LINE__);
 	if (!info->id_gpiod && !info->vbus_gpiod) {
 		dev_err(dev, "failed to get gpios\n");
 		return -ENODEV;
 	}
-	printk("function:%s line:%d \n",__FUNCTION__,__LINE__);
 
 	if (IS_ERR(info->id_gpiod))
 		return PTR_ERR(info->id_gpiod);
 
-	printk("function:%s line:%d \n",__FUNCTION__,__LINE__);
 	if (IS_ERR(info->vbus_gpiod))
 		return PTR_ERR(info->vbus_gpiod);
 
-	printk("function:%s line:%d \n",__FUNCTION__,__LINE__);
 	info->edev = devm_extcon_dev_allocate(dev, usb_extcon_cable);
 	if (IS_ERR(info->edev)) {
 		dev_err(dev, "failed to allocate extcon device\n");
@@ -211,7 +209,6 @@ static int usb_extcon_probe(struct platform_device *pdev)
 
 	/* Perform initial detection */
 	usb_extcon_detect_cable(&info->wq_detcable.work);
-	printk("function:%s line:%d \n",__FUNCTION__,__LINE__);
 
 	return 0;
 }
