@@ -333,6 +333,8 @@ MODULE_PARM_DESC(macaddr, "FEC Ethernet MAC address");
 	(addr < txq->tso_hdrs_dma + txq->bd.ring_size * TSO_HEADER_SIZE))
 
 #define PHY_ID_AR8031   0x004dd074
+#define PHY_ID_KSZ9031   0x00221622
+#define PHY_ID_YT8531    0x4f51e91b
 
 static int mii_cnt;
 
@@ -3911,13 +3913,31 @@ static ssize_t template_1000base_store(struct device *dev, struct device_attribu
 	fep = netdev_priv(ndev);
 	tmp = simple_strtoul(buf, NULL, 0);
 	if(tmp == 1 ){
-		phy_write(ndev->phydev, 0x10, 0x0800);
-		phy_write(ndev->phydev, 0x1d, 0x000b);
-		phy_write(ndev->phydev, 0x1e, 0x0009);
-		phy_write(ndev->phydev, 0x1d, 0x0004);
-		phy_write(ndev->phydev, 0x1e, 0xfbbb);
-		phy_write(ndev->phydev, 0x00, 0x8140);
-		phy_write(ndev->phydev, 0x09, 0x2200);
+		printk("phydev->phy_id=0x%0x\n",ndev->phydev->phy_id);
+		if(ndev->phydev->phy_id == PHY_ID_AR8031){
+			printk("AR8031 TEST\n");
+			phy_write(ndev->phydev, 0x10, 0x0800);
+			phy_write(ndev->phydev, 0x1d, 0x000b);
+			phy_write(ndev->phydev, 0x1e, 0x0009);
+			phy_write(ndev->phydev, 0x1d, 0x0004);
+			phy_write(ndev->phydev, 0x1e, 0xfbbb);
+			phy_write(ndev->phydev, 0x00, 0x8140);
+			phy_write(ndev->phydev, 0x09, 0x2200);
+		}
+		else if(ndev->phydev->phy_id == PHY_ID_KSZ9031){
+			printk("KSZ9031 TEST Mode 1 Waveform\n");
+			phy_write(ndev->phydev, 0x00, 0x0140);
+			phy_write(ndev->phydev, 0x09, 0x3b00);
+		}
+		else if(ndev->phydev->phy_id == PHY_ID_YT8531){
+			printk("YT8531 TEST \n");
+			phy_write(ndev->phydev, 0x1e, 0x27);  //write utp ext reg 0x27:0x2026
+			phy_write(ndev->phydev, 0x1f, 0x2026);  //write utp ext reg 0x27:0x2026
+			phy_write(ndev->phydev, 0x10, 0x0002);
+			phy_write(ndev->phydev, 0x00, 0x8140);
+			phy_write(ndev->phydev, 0x09, 0x2200);
+			phy_write(ndev->phydev, 0x00, 0x8140);
+		}
 	}
 	return size;
 }
@@ -3952,11 +3972,29 @@ static ssize_t jitter_master_store(struct device *dev, struct device_attribute *
 	fep = netdev_priv(ndev);
 	tmp = simple_strtoul(buf, NULL, 0);
 	if(tmp == 1 ){
-		phy_write(ndev->phydev, 0x10, 0x0800);
-		phy_write(ndev->phydev, 0x1d, 0x000b);
-		phy_write(ndev->phydev, 0x1e, 0x0009);
-		phy_write(ndev->phydev, 0x00, 0x8140);
-		phy_write(ndev->phydev, 0x09, 0x4200);
+		printk("phydev->phy_id=0x%0x\n",ndev->phydev->phy_id);
+		if(ndev->phydev->phy_id == PHY_ID_AR8031){
+			printk("AR8031 TEST\n");
+			phy_write(ndev->phydev, 0x10, 0x0800);
+			phy_write(ndev->phydev, 0x1d, 0x000b);
+			phy_write(ndev->phydev, 0x1e, 0x0009);
+			phy_write(ndev->phydev, 0x00, 0x8140);
+			phy_write(ndev->phydev, 0x09, 0x4200);
+		}
+		else if(ndev->phydev->phy_id == PHY_ID_KSZ9031){
+			printk("KSZ9031 Jitter Testing as Master \n");
+			phy_write(ndev->phydev, 0x00, 0x0140);
+			phy_write(ndev->phydev, 0x09, 0x5b00);
+		}
+		else if(ndev->phydev->phy_id == PHY_ID_YT8531){
+			printk("YT8531 TEST \n");
+			phy_write(ndev->phydev, 0x1e, 0x27);  //write utp ext reg 0x27:0x2026
+			phy_write(ndev->phydev, 0x1f, 0x2026);  //write utp ext reg 0x27:0x2026
+			phy_write(ndev->phydev, 0x10, 0x0002);
+			phy_write(ndev->phydev, 0x00, 0x8140);
+			phy_write(ndev->phydev, 0x5a, 0x5a00);
+			phy_write(ndev->phydev, 0x00, 0x8140);
+		}
 	}
 	return size;
 }
@@ -3992,11 +4030,29 @@ static ssize_t  distortion_store(struct device *dev, struct device_attribute *at
 	fep = netdev_priv(ndev);
 	tmp = simple_strtoul(buf, NULL, 0);
 	if(tmp == 1 ){
-		phy_write(ndev->phydev, 0x10, 0x0800);
-		phy_write(ndev->phydev, 0x1d, 0x000b);
-		phy_write(ndev->phydev, 0x1e, 0x0009);
-		phy_write(ndev->phydev, 0x00, 0x8140);
-		phy_write(ndev->phydev, 0x09, 0x8200);
+		printk("phydev->phy_id=0x%0x\n",ndev->phydev->phy_id);
+		if(ndev->phydev->phy_id == PHY_ID_AR8031){
+			printk("AR8031 TEST\n");
+			phy_write(ndev->phydev, 0x10, 0x0800);
+			phy_write(ndev->phydev, 0x1d, 0x000b);
+			phy_write(ndev->phydev, 0x1e, 0x0009);
+			phy_write(ndev->phydev, 0x00, 0x8140);
+			phy_write(ndev->phydev, 0x09, 0x8200);
+		}
+		else if(ndev->phydev->phy_id == PHY_ID_KSZ9031){
+			printk("KSZ9031 Test Mode 4 Waveform\n");
+			phy_write(ndev->phydev, 0x00, 0x0140);
+			phy_write(ndev->phydev, 0x09, 0x9b00);
+		}
+		else if(ndev->phydev->phy_id == PHY_ID_YT8531){
+			printk("YT8531 TEST \n");
+			phy_write(ndev->phydev, 0x1e, 0x27);  //write utp ext reg 0x27:0x2026
+			phy_write(ndev->phydev, 0x1f, 0x2026);  //write utp ext reg 0x27:0x2026
+			phy_write(ndev->phydev, 0x10, 0x0002);
+			phy_write(ndev->phydev, 0x00, 0x8140);
+			phy_write(ndev->phydev, 0x09, 0x8200);
+			phy_write(ndev->phydev, 0x00, 0x8140);
+		}
 	}
 	return size;
 }
@@ -4031,12 +4087,30 @@ static ssize_t template_100base_store(struct device *dev, struct device_attribut
 	fep = netdev_priv(ndev);
 	tmp = simple_strtoul(buf, NULL, 0);
 	if(tmp == 1 ){
-		phy_write(ndev->phydev, 0x10, 0x0800);
-		phy_write(ndev->phydev, 0x00, 0xA100);
-		phy_write(ndev->phydev, 0x1d, 0x0029);
-		phy_write(ndev->phydev, 0x1e, 0x36dc);
-		phy_write(ndev->phydev, 0x1d, 0x000b);
-		phy_write(ndev->phydev, 0x1e, 0x3c40);
+		printk("phydev->phy_id=0x%0x\n",ndev->phydev->phy_id);
+		if(ndev->phydev->phy_id == PHY_ID_AR8031){
+			printk("AR8031 TEST\n");
+			phy_write(ndev->phydev, 0x10, 0x0800);
+			phy_write(ndev->phydev, 0x00, 0xA100);
+			phy_write(ndev->phydev, 0x1d, 0x0029);
+			phy_write(ndev->phydev, 0x1e, 0x36dc);
+			phy_write(ndev->phydev, 0x1d, 0x000b);
+			phy_write(ndev->phydev, 0x1e, 0x3c40);
+		}
+		else if(ndev->phydev->phy_id == PHY_ID_KSZ9031){
+			printk("KSZ9031 TEST MDI mode\n");
+			phy_write(ndev->phydev, 0x00, 0x2100);
+			phy_write(ndev->phydev, 0x1C, 0x00C0);
+		}
+		else if(ndev->phydev->phy_id == PHY_ID_YT8531){
+			printk("YT8531 TEST \n");
+			phy_write(ndev->phydev, 0x1e, 0xa000); //write commom ext reg 0xa000:0x0 
+			phy_write(ndev->phydev, 0x1f, 0x0000);  
+			phy_write(ndev->phydev, 0x1e, 0x27);  //write utp ext reg 0x27:0x2026
+			phy_write(ndev->phydev, 0x1f, 0x2026);  //write utp ext reg 0x27:0x2026
+			phy_write(ndev->phydev, 0x10, 0x0002);
+			phy_write(ndev->phydev, 0x00, 0xa100);
+		}
 	}
 	return size;
 }
@@ -4071,14 +4145,29 @@ static ssize_t link_pulse_store(struct device *dev, struct device_attribute *att
 	fep = netdev_priv(ndev);
 	tmp = simple_strtoul(buf, NULL, 0);
 	if(tmp == 1 ){
-		phy_write(ndev->phydev, 0x10, 0x0800);
-		phy_write(ndev->phydev, 0x00, 0x8100);
-		phy_write(ndev->phydev, 0x1d, 0x0029);
-		phy_write(ndev->phydev, 0x1e, 0x36dc);
-		phy_write(ndev->phydev, 0x1d, 0x000b);
-		phy_write(ndev->phydev, 0x1e, 0x3c40);
-		phy_write(ndev->phydev, 0x1d, 0x0012);
-		phy_write(ndev->phydev, 0x1e, 0x4c0f);
+		printk("phydev->phy_id=0x%0x\n",ndev->phydev->phy_id);
+		if(ndev->phydev->phy_id == PHY_ID_AR8031){
+			printk("AR8031 TEST\n");
+			phy_write(ndev->phydev, 0x10, 0x0800);
+			phy_write(ndev->phydev, 0x00, 0x8100);
+			phy_write(ndev->phydev, 0x1d, 0x0029);
+			phy_write(ndev->phydev, 0x1e, 0x36dc);
+			phy_write(ndev->phydev, 0x1d, 0x000b);
+			phy_write(ndev->phydev, 0x1e, 0x3c40);
+			phy_write(ndev->phydev, 0x1d, 0x0012);
+			phy_write(ndev->phydev, 0x1e, 0x4c0f);
+		}
+		else if(ndev->phydev->phy_id == PHY_ID_KSZ9031){
+			printk("KSZ9031 TEST link pulse\n");
+			phy_write(ndev->phydev, 0x00, 0x0100);
+		}
+		else if(ndev->phydev->phy_id == PHY_ID_YT8531){
+			printk("YT8531 TEST \n");
+			phy_write(ndev->phydev, 0x1e, 0xa000); //write commom ext reg 0xa000:0x0 
+			phy_write(ndev->phydev, 0x1f, 0x0000);  
+			phy_write(ndev->phydev, 0x00, 0x8100);
+			phy_write(ndev->phydev, 0x0a, 0x020b);
+		}
 	}
 	return size;
 }
@@ -4113,14 +4202,29 @@ static ssize_t mau_store(struct device *dev, struct device_attribute *attr, cons
 	fep = netdev_priv(ndev);
 	tmp = simple_strtoul(buf, NULL, 0);
 	if(tmp == 1 ){
-		phy_write(ndev->phydev, 0x10, 0x0800);
-		phy_write(ndev->phydev, 0x00, 0x8100);
-		phy_write(ndev->phydev, 0x1d, 0x0029);
-		phy_write(ndev->phydev, 0x1e, 0x36dc);
-		phy_write(ndev->phydev, 0x1d, 0x000b);
-		phy_write(ndev->phydev, 0x1e, 0x3c40);
-		phy_write(ndev->phydev, 0x1d, 0x0012);
-		phy_write(ndev->phydev, 0x1e, 0x4c0e);
+		printk("phydev->phy_id=0x%0x\n",ndev->phydev->phy_id);
+		if(ndev->phydev->phy_id == PHY_ID_AR8031){
+			printk("AR8031 TEST\n");
+			phy_write(ndev->phydev, 0x10, 0x0800);
+			phy_write(ndev->phydev, 0x00, 0x8100);
+			phy_write(ndev->phydev, 0x1d, 0x0029);
+			phy_write(ndev->phydev, 0x1e, 0x36dc);
+			phy_write(ndev->phydev, 0x1d, 0x000b);
+			phy_write(ndev->phydev, 0x1e, 0x3c40);
+			phy_write(ndev->phydev, 0x1d, 0x0012);
+			phy_write(ndev->phydev, 0x1e, 0x4c0e);
+		}
+		else if(ndev->phydev->phy_id == PHY_ID_KSZ9031){
+			printk("KSZ9031 TEST 10base-t loopback mode\n");
+			phy_write(ndev->phydev, 0x00, 0x0100);
+			phy_write(ndev->phydev, 0x11, 0x01f4);
+			phy_write(ndev->phydev, 0x1c, 0x00c0);
+		}
+		else if(ndev->phydev->phy_id == PHY_ID_YT8531){
+			printk("YT8531 TEST \n");
+			phy_write(ndev->phydev, 0x10, 0x0002);
+			phy_write(ndev->phydev, 0x00, 0x8100);
+		}
 	}
 	return size;
 }
@@ -4155,14 +4259,31 @@ static ssize_t harmonic_store(struct device *dev, struct device_attribute *attr,
 	fep = netdev_priv(ndev);
 	tmp = simple_strtoul(buf, NULL, 0);
 	if(tmp == 1 ){
-		phy_write(ndev->phydev, 0x10, 0x0800);
-		phy_write(ndev->phydev, 0x00, 0x8100);
-		phy_write(ndev->phydev, 0x1d, 0x0029);
-		phy_write(ndev->phydev, 0x1e, 0x36dc);
-		phy_write(ndev->phydev, 0x1d, 0x000b);
-		phy_write(ndev->phydev, 0x1e, 0x3c40);
-		phy_write(ndev->phydev, 0x1d, 0x0012);
-		phy_write(ndev->phydev, 0x1e, 0x4c0d);
+		printk("phydev->phy_id=0x%0x\n",ndev->phydev->phy_id);
+		if(ndev->phydev->phy_id == PHY_ID_AR8031){
+			printk("AR8031 TEST\n");
+			phy_write(ndev->phydev, 0x10, 0x0800);
+			phy_write(ndev->phydev, 0x00, 0x8100);
+			phy_write(ndev->phydev, 0x1d, 0x0029);
+			phy_write(ndev->phydev, 0x1e, 0x36dc);
+			phy_write(ndev->phydev, 0x1d, 0x000b);
+			phy_write(ndev->phydev, 0x1e, 0x3c40);
+			phy_write(ndev->phydev, 0x1d, 0x0012);
+			phy_write(ndev->phydev, 0x1e, 0x4c0d);
+		}
+		else if(ndev->phydev->phy_id == PHY_ID_KSZ9031){
+			printk("KSZ9031 TEST 10base-t harmonic\n");
+			phy_write(ndev->phydev, 0x00, 0x0100);
+			phy_write(ndev->phydev, 0x11, 0x01f4);
+			phy_write(ndev->phydev, 0x1c, 0x00c0);
+		}
+		else if(ndev->phydev->phy_id == PHY_ID_YT8531){
+			printk("YT8531 TEST \n");
+			phy_write(ndev->phydev, 0x1e, 0xa000); //write commom ext reg 0xa000:0x0 
+			phy_write(ndev->phydev, 0x1f, 0x0000);  
+			phy_write(ndev->phydev, 0x00, 0x8100);
+			phy_write(ndev->phydev, 0x0a, 0x0209);
+		}
 	}
 	return size;
 }
