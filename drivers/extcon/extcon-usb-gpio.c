@@ -75,12 +75,12 @@ static void usb_extcon_detect_cable(struct work_struct *work)
 	printk("function:%s line:%d id:%d  \n",__FUNCTION__,__LINE__,id);
 	/* at first we clean states which are no longer active */
 	if (id){
-		extcon_set_state_sync(info->edev, EXTCON_USB_HOST, false);
+		extcon_set_state_sync(info->edev, EXTCON_USB, false);
 		if(info->vbus_power) {
 			gpiod_set_value(info->vbus_power, 1);
 		}
 	} else {
-		extcon_set_state_sync(info->edev, EXTCON_USB, false);
+		extcon_set_state_sync(info->edev, EXTCON_USB_HOST, false);
 		if(info->vbus_power) {
 			gpiod_set_value(info->vbus_power, 0);
 		}
