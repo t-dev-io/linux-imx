@@ -326,6 +326,7 @@
 	status = "okay";
 };
 
+#if 0
 &ecspi2 {
 	#address-cells = <1>;
 	#size-cells = <0>;
@@ -341,6 +342,7 @@
 		spi-max-frequency = <500000>;
 	};
 };
+#endif
 
 &eqos {
 	pinctrl-names = "default";
@@ -498,13 +500,6 @@
 			};
 		};
 	};
-};
-
-&i2c2 {
-	clock-frequency = <100000>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_i2c2>;
-	status = "okay";
 
 	adv_bridge: adv7535@3d {
 		compatible = "adi,adv7535";
@@ -519,6 +514,13 @@
 			};
 		};
 	};
+};
+
+&i2c2 {
+	clock-frequency = <100000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c2>;
+	status = "okay";
 
 	lvds_bridge: lvds-to-hdmi-bridge@4c {
 		compatible = "ite,it6263";
@@ -970,6 +972,12 @@
 		>;
 	};
 
+	pinctrl_dsi_en: dsi_engrp {
+		fsl,pins = <
+			MX8MP_IOMUXC_SAI2_RXC__GPIO4_IO22		0x19
+		>;
+	};
+
 	pinctrl_pwm1: pwm1grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_GPIO1_IO01__PWM1_OUT	0x116
@@ -982,6 +990,7 @@
 		>;
 	};
 
+#if 0
 	pinctrl_ecspi2: ecspi2grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_ECSPI2_SCLK__ECSPI2_SCLK		0x82
@@ -989,6 +998,7 @@
 			MX8MP_IOMUXC_ECSPI2_MISO__ECSPI2_MISO		0x82
 		>;
 	};
+#endif
 
 	pinctrl_ecspi2_cs: ecspi2cs {
 		fsl,pins = <
@@ -1012,7 +1022,6 @@
 			MX8MP_IOMUXC_ENET_TD3__ENET_QOS_RGMII_TD3			0x1f
 			MX8MP_IOMUXC_ENET_TX_CTL__ENET_QOS_RGMII_TX_CTL			0x1f
 			MX8MP_IOMUXC_ENET_TXC__CCM_ENET_QOS_CLOCK_GENERATE_TX_CLK	0x1f
-			MX8MP_IOMUXC_SAI2_RXC__GPIO4_IO22				0x19
 			MX8MP_IOMUXC_NAND_ALE__GPIO3_IO00				0x19
 			MX8MP_IOMUXC_GPIO1_IO09__GPIO1_IO09			0x19
 		>;
@@ -1115,12 +1124,6 @@
 		fsl,pins = <
 			MX8MP_IOMUXC_I2C3_SCL__I2C3_SCL		0x400001c2
 			MX8MP_IOMUXC_I2C3_SDA__I2C3_SDA		0x400001c2
-		>;
-	};
-
-	pinctrl_mipi_dsi_en: mipi_dsi_en {
-		fsl,pins = <
-			MX8MP_IOMUXC_GPIO1_IO08__GPIO1_IO08	0x16
 		>;
 	};
 

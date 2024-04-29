@@ -1278,6 +1278,22 @@ static int adv7511_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 	else
 		adv7511->type = id->driver_data;
 
+	/*
+	 * The power down GPIO is optional. If present, toggle it from active to
+	 * inactive to wake up the encoder.
+	 */
+	adv7511->gpio_pd = devm_gpiod_get_optional(dev, "pd", GPIOD_OUT_HIGH);
+	if (IS_ERR(adv7511->gpio_pd)) {
+		ret = PTR_ERR(adv7511->gpio_pd);
+		goto uninit_regulators;
+	}
+
+	if (adv7511->gpio_pd) {
+		usleep_range(5000, 6000);
+		gpiod_set_value_cansleep(adv7511->gpio_pd, 0);
+		usleep_range(1000, 1100);
+	}
+
 	memset(&link_config, 0, sizeof(link_config));
 
 	if (adv7511->type == ADV7511)
@@ -1308,31 +1324,23 @@ static int adv7511_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 	else
 		adv7511->addr_pkt = pkt_i2c_addr >> 1;
 
-	/*
-	 * The power down GPIO is optional. If present, toggle it from active to
-	 * inactive to wake up the encoder.
-	 */
-	adv7511->gpio_pd = devm_gpiod_get_optional(dev, "pd", GPIOD_OUT_HIGH);
-	if (IS_ERR(adv7511->gpio_pd)) {
-		ret = PTR_ERR(adv7511->gpio_pd);
-		goto uninit_regulators;
-	}
-
-	if (adv7511->gpio_pd) {
-		usleep_range(5000, 6000);
-		gpiod_set_value_cansleep(adv7511->gpio_pd, 0);
-	}
-
 	adv7511->regmap = devm_regmap_init_i2c(i2c, &adv7511_regmap_config);
 	if (IS_ERR(adv7511->regmap)) {
 		ret = PTR_ERR(adv7511->regmap);
 		goto uninit_regulators;
 	}
 
-	ret = regmap_read(adv7511->regmap, ADV7511_REG_CHIP_REVISION, &val);
+	do {
+		ret = regmap_read(adv7511->regmap, ADV7511_REG_CHIP_REVISION, &val);
+		if ( ret && adv7511->gpio_pd ){
+			usleep_range(1000, 1100);
+		} else {
+			break;
+		}
+	} while( adv7511->gpio_pd && (sleep_count--));
 	if (ret)
 		goto uninit_regulators;
-	dev_dbg(dev, "Rev. %d\n", val);
+	dev_info(dev, "Rev. %d\n", val);
 
 	if (adv7511->type == ADV7511)
 		ret = regmap_register_patch(adv7511->regmap,
