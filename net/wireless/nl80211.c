@@ -3540,7 +3540,7 @@ out:
 static int nl80211_send_chandef(struct sk_buff *msg,
 				const struct cfg80211_chan_def *chandef)
 {
-	if (WARN_ON(!cfg80211_chandef_valid(chandef)))
+	if (!cfg80211_chandef_valid(chandef))
 		return -EINVAL;
 
 	if (nla_put_u32(msg, NL80211_ATTR_WIPHY_FREQ,
