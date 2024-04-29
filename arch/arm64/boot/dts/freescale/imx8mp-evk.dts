@@ -48,6 +48,19 @@
 		      <0x1 0x00000000 0 0xc0000000>;
 	};
 
+	hms_pwr_3g {  
+		compatible = "hms_pwr_3g";  
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_pwr_3g>;
+
+		chip_power_gpio = <&gpio2 11 GPIO_ACTIVE_HIGH>;
+		chip_wake_gpio = <&gpio4 24 GPIO_ACTIVE_LOW>;// this pin is from 3g to mx8, it should be input
+		chip_req_gpio =  <&gpio4 25 GPIO_ACTIVE_LOW>;  
+		chip_dis_gpio =  <&gpio4 26 GPIO_ACTIVE_LOW>;
+		chip_reset_gpio = <&gpio4 23 GPIO_ACTIVE_LOW>;
+		// chip_en_gpio    = <&gpio2 16 1>;
+	};
+
 	reg_vdcdc6_5v: regulator-vdc5v {
 		compatible = "regulator-fixed";
 		regulator-name = "vdcdc6_5v";
@@ -795,6 +808,7 @@
 	status = "okay";
 };
 
+#if 0
 &sai2 {
 	#sound-dai-cells = <0>;
 	pinctrl-names = "default";
@@ -804,6 +818,7 @@
 	assigned-clock-rates = <12288000>;
 	status = "okay";
 };
+#endif
 
 &sai3 {
 	pinctrl-names = "default";
@@ -1106,6 +1121,16 @@
 		>;
 	};
 
+	pinctrl_pwr_3g: pwr3ggrp {
+		fsl,pins = <
+			MX8MP_IOMUXC_SD1_STROBE__GPIO2_IO11	0x16
+			MX8MP_IOMUXC_SAI2_TXFS__GPIO4_IO24	0x16
+			MX8MP_IOMUXC_SAI2_TXC__GPIO4_IO25	0x16
+			MX8MP_IOMUXC_SAI2_TXD0__GPIO4_IO26	0x16
+			MX8MP_IOMUXC_SAI2_RXD0__GPIO4_IO23	0x16
+		>;
+	};
+
 	pinctrl_i2c1: i2c1grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_I2C1_SCL__I2C1_SCL		0x400001c2
@@ -1164,6 +1189,7 @@
 	};
 #endif
 
+#if 0
 	pinctrl_sai2: sai2grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_SAI2_TXC__AUDIOMIX_SAI2_TX_BCLK	0xd6
@@ -1172,6 +1198,7 @@
 			MX8MP_IOMUXC_SAI2_RXD0__AUDIOMIX_SAI2_RX_DATA00	0xd6
 		>;
 	};
+#endif
 
 	pinctrl_sai3: sai3grp {
 		fsl,pins = <
