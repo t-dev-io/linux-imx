@@ -78,22 +78,22 @@
 		compatible = "regulator-fixed";
 		regulator-name = "can1-stby";
 		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_flexcan1_reg>;
+		// pinctrl-0 = <&pinctrl_flexcan1_reg>;
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
-		gpio = <&gpio5 5 GPIO_ACTIVE_HIGH>;
-		enable-active-high;
+		// gpio = <&gpio5 5 GPIO_ACTIVE_HIGH>;
+		// enable-active-high;
 	};
 
 	reg_can2_stby: regulator-can2-stby {
 		compatible = "regulator-fixed";
 		regulator-name = "can2-stby";
 		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_flexcan2_reg>;
+		// pinctrl-0 = <&pinctrl_flexcan2_reg>;
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
-		gpio = <&gpio4 27 GPIO_ACTIVE_HIGH>;
-		enable-active-high;
+		// gpio = <&gpio4 27 GPIO_ACTIVE_HIGH>;
+		// enable-active-high;
 	};
 
 	reg_usdhc2_vmmc: regulator-usdhc2 {
@@ -278,14 +278,14 @@
 &flexcan1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexcan1>;
-	// xceiver-supply = <&reg_can1_stby>;
+	xceiver-supply = <&reg_can1_stby>;
 	status = "okay";
 };
 
 &flexcan2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexcan2>;
-	// xceiver-supply = <&reg_can2_stby>;
+	xceiver-supply = <&reg_can2_stby>;
 	// pinctrl-assert-gpios = <&pca6416 3 GPIO_ACTIVE_HIGH>;
 	status = "okay";/* can2 pin conflict with pdm */
 };
@@ -1042,8 +1042,8 @@
 
 	pinctrl_flexcan1: flexcan1grp {
 		fsl,pins = <
-			MX8MP_IOMUXC_SPDIF_RX__CAN1_RX          0x154
-			MX8MP_IOMUXC_SPDIF_TX__CAN1_TX          0x154
+			MX8MP_IOMUXC_SAI5_RXD2__CAN1_RX					0x154
+			MX8MP_IOMUXC_SAI5_RXD1__CAN1_TX					0x154
 		>;
 	};
 
