@@ -16,7 +16,7 @@
 		pinctrl-0 = <&pinctrl_lvds>;
 		backlight = <&lvds_backlight>;
 		power-supply = <&lvds_bl_pwren>;
-        enable = <&gpio4 1 GPIO_ACTIVE_HIGH >;
+		enable-gpio = <&gpio4 1 GPIO_ACTIVE_HIGH >;
 		port {
 			panel_lvds_in: endpoint {
 				remote-endpoint = <&lvds_out>;
