@@ -274,8 +274,8 @@
 
 	pinctrl_gpio_keys: gpiokeysgrp {
 		fsl,pins = <
-			MX8MP_IOMUXC_SD1_DATA3__GPIO2_IO05     0x19 //SLEEP_B
-			MX8MP_IOMUXC_SD1_CMD__GPIO2_IO01       0x19 //LID_B
+			MX8MP_IOMUXC_SD1_DATA3__GPIO2_IO05     0x156 //SLEEP_B
+			MX8MP_IOMUXC_SD1_CMD__GPIO2_IO01       0x156 //LID_B
 		>;
 	};
 
