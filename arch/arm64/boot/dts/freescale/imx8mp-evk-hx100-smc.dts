@@ -7,7 +7,12 @@
 /delete-node/ &reg_m2_3v3;
 /delete-node/ &lvds_bl_pwren;
 /delete-node/ &rt5640;
+/delete-node/ &reg_vdcdc6_5v;
 /{
+	hms_pwr_3g {
+		/delete-property/ chip_power_gpio;
+	};
+
 	reg_dsi_en: dsien {
 		compatible = "regulator-gpio";
 		pinctrl-names = "default";
@@ -30,6 +35,16 @@
 		regulator-name = "gpio_dvfs2";
 		gpios = <&gpio2 10 GPIO_ACTIVE_HIGH>;
 		states = <3300000 0x1 3300000 0x0>;
+		enable-active-high;
+		regulator-always-on;
+	};
+
+	lvds_bl_en: regulator-lvds-bl-en {
+		compatible = "regulator-fixed";
+		regulator-name = "lvds-bl-en";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpio4 28 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
 		regulator-always-on;
 	};
@@ -119,6 +134,11 @@
 	/delete-property/ pinctrl-1; 
 };
 
+&pwm2 {
+	/delete-property/ pinctrl-0;
+	status = "disabled";
+};
+
 &iomuxc {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog>,<&pinctrl_m2_5g>;
@@ -130,12 +150,20 @@
 			MX8MP_IOMUXC_HDMI_DDC_SDA__HDMIMIX_HDMI_SDA	0x400001c3
 			MX8MP_IOMUXC_HDMI_HPD__HDMIMIX_HDMI_HPD		0x40000019
 			MX8MP_IOMUXC_HDMI_CEC__HDMIMIX_HDMI_CEC		0x40000019
-
 			MX8MP_IOMUXC_SD1_CLK__GPIO2_IO00					0x19
 			MX8MP_IOMUXC_SD1_DATA0__GPIO2_IO02				0x19
 			MX8MP_IOMUXC_SD1_DATA1__GPIO2_IO03				0x19
 			MX8MP_IOMUXC_SD1_DATA2__GPIO2_IO04				0x19
 			MX8MP_IOMUXC_SD1_DATA4__GPIO2_IO06				0x19
+			MX8MP_IOMUXC_SD1_STROBE__GPIO2_IO11				0x16
+			MX8MP_IOMUXC_SAI1_RXD1__GPIO4_IO03				0x19
+			MX8MP_IOMUXC_SPDIF_TX__GPIO5_IO03					0x19
+			MX8MP_IOMUXC_SPDIF_EXT_CLK__GPIO5_IO05		0x19
+			MX8MP_IOMUXC_GPIO1_IO10__GPIO1_IO10				0x19    /*USBOTG1_ID*/
+			MX8MP_IOMUXC_GPIO1_IO11__GPIO1_IO11				0x19    /*USBOTG2_ID*/
+			MX8MP_IOMUXC_SPDIF_RX__GPIO5_IO04					0x19
+			MX8MP_IOMUXC_GPIO1_IO00__GPIO1_IO00				0x19    /*BATLOW_B*/
+			MX8MP_IOMUXC_SAI1_MCLK__GPIO4_IO20				0x19    /*AT_DET_B*/
 			MX8MP_IOMUXC_SAI2_RXFS__GPIO4_IO21				0x19
 			MX8MP_IOMUXC_SAI2_MCLK__GPIO4_IO27				0x19
 		>;
