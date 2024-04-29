@@ -694,6 +694,62 @@ static ssize_t harmonic_store(struct device *dev, struct device_attribute *attr,
 
 static DEVICE_ATTR(harmonic, S_IRUGO | S_IWUSR, harmonic_show, harmonic_store);
 
+static int dwmac_reset_phy(struct platform_device *pdev)
+{
+	int err, phy_reset;
+	bool active_high = false;
+	int msec = 1, phy_post_delay = 0;
+	struct device_node *np = pdev->dev.of_node;
+
+	printk("function=%s line=%d\r\n",__FUNCTION__,__LINE__);
+	if (!np)
+		return 0;
+
+	err = of_property_read_u32(np, "phy-reset-duration", &msec);
+	/* A sane reset duration should not be longer than 1s */
+	if (!err && msec > 1000)
+		msec = 1;
+
+	phy_reset = of_get_named_gpio(np, "phy-reset-gpios", 0);
+	if (phy_reset == -EPROBE_DEFER)
+		return phy_reset;
+	else if (!gpio_is_valid(phy_reset))
+		return 0;
+
+	err = of_property_read_u32(np, "phy-reset-post-delay", &phy_post_delay);
+	/* valid reset duration should be less than 1s */
+	if (!err && phy_post_delay > 1000)
+		return -EINVAL;
+
+	active_high = of_property_read_bool(np, "phy-reset-active-high");
+
+	err = devm_gpio_request_one(&pdev->dev, phy_reset,
+			active_high ? GPIOF_OUT_INIT_HIGH : GPIOF_OUT_INIT_LOW,
+			"phy-reset");
+	if (err) {
+		dev_err(&pdev->dev, "failed to get phy-reset-gpios: %d\n", err);
+		return err;
+	}
+
+	if (msec > 20)
+		msleep(msec);
+	else
+		usleep_range(msec * 1000, msec * 1000 + 1000);
+
+	gpio_set_value_cansleep(phy_reset, !active_high);
+
+	if (!phy_post_delay)
+		return 0;
+
+	if (phy_post_delay > 20)
+		msleep(phy_post_delay);
+	else
+		usleep_range(phy_post_delay * 1000,
+			     phy_post_delay * 1000 + 1000);
+
+	return 0;
+}
+
 static int imx_dwmac_probe(struct platform_device *pdev)
 {
 	struct plat_stmmacenet_data *plat_dat;
@@ -702,7 +758,8 @@ static int imx_dwmac_probe(struct platform_device *pdev)
 	const struct imx_dwmac_ops *data;
 	int ret;
 
-	struct device_node *chip = NULL;  
+	struct device_node *chip = NULL;
+#if 0
 	int chip_reset_gpio;  
 
 	chip_reset_gpio = of_get_named_gpio(chip, "phy-reset-gpios", 0);  
@@ -718,6 +775,7 @@ static int imx_dwmac_probe(struct platform_device *pdev)
 			mdelay(200);
 		}
 	}
+#endif
 
 	ret = stmmac_get_platform_resources(pdev, &stmmac_res);
 	if (ret)
@@ -747,6 +805,7 @@ static int imx_dwmac_probe(struct platform_device *pdev)
 		goto err_parse_dt;
 	}
 
+	dwmac_reset_phy(pdev);
 	plat_dat->addr64 = dwmac->ops->addr_width;
 	plat_dat->init = imx_dwmac_init;
 	plat_dat->exit = imx_dwmac_exit;

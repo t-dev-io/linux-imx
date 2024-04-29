@@ -418,6 +418,7 @@
 	phy-mode = "rgmii-id";
 	phy-handle = <&ethphy0>;
 	phy-reset-gpios = <&gpio3 1 GPIO_ACTIVE_LOW>;
+	phy-reset-duration = <20>;
 	fsl,ar8031-phy-fixup;
 	snps,force_thresh_dma_mode;
 	snps,mtl-tx-config = <&mtl_tx_setup>;
@@ -498,6 +499,7 @@
 	phy-handle = <&ethphy1>;
 	fsl,ar8031-phy-fixup;
 	phy-reset-gpios = <&gpio3 0 GPIO_ACTIVE_LOW>;
+	phy-reset-duration = <20>;
 	fsl,magic-packet;
 	status = "okay";
 

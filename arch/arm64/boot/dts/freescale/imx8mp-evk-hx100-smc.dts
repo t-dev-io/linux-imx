@@ -104,14 +104,17 @@
 &eqos {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_eqos>;
-	phy-reset-gpios = <&gpio4 18 GPIO_ACTIVE_LOW>;
+	// phy-reset-gpios = <&gpio4 18 GPIO_ACTIVE_LOW>;
+	phy-reset-gpios = <&gpio1 7 GPIO_ACTIVE_LOW>;
+	phy-reset-duration = <20>;
 	status = "okay";
 };
 
 &fec {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_fec>;
-	phy-reset-gpios = <&gpio4 27 GPIO_ACTIVE_LOW>;
+	// phy-reset-gpios = <&gpio4 27 GPIO_ACTIVE_LOW>;
+	/delete-property/ phy-reset-gpios;
 	status = "okay";
 };
 
@@ -210,10 +213,11 @@
 			MX8MP_IOMUXC_ENET_TXC__CCM_ENET_QOS_CLOCK_GENERATE_TX_CLK	0x1f
 			// MX8MP_IOMUXC_GPIO1_IO09__GPIO1_IO09		0x19
 			// MX8MP_IOMUXC_NAND_CE0_B__GPIO3_IO01             0x19
-			MX8MP_IOMUXC_GPIO1_IO07__CCM_EXT_CLK4		0x19    //ETH_REF_CLK/ECLK4
+			// MX8MP_IOMUXC_GPIO1_IO07__CCM_EXT_CLK4		0x19    //ETH_REF_CLK/ECLK4
 			MX8MP_IOMUXC_GPIO1_IO08__ENET_QOS_1588_EVENT0_IN		0x19    //ETH0_1588PPS_IN
 			MX8MP_IOMUXC_GPIO1_IO05__GPIO1_IO05		0x19	//ETH0_INT_B
-			MX8MP_IOMUXC_SAI1_TXD6__GPIO4_IO18		    0x19  //rst
+			// MX8MP_IOMUXC_SAI1_TXD6__GPIO4_IO18		    0x19  //rst
+			MX8MP_IOMUXC_GPIO1_IO07__GPIO1_IO07             0x19
 		>;
 	};
 
@@ -236,8 +240,8 @@
 			MX8MP_IOMUXC_SAI1_TXD5__ENET1_RGMII_TXC		0x1f
 			MX8MP_IOMUXC_SAI1_RXD0__GPIO4_IO02		0x19
 			MX8MP_IOMUXC_GPIO1_IO06__GPIO1_IO06		0x19
-			//MX8MP_IOMUXC_NAND_ALE__GPIO3_IO00		0x19
-			MX8MP_IOMUXC_SAI2_MCLK__GPIO4_IO27		 0x19
+			// MX8MP_IOMUXC_NAND_ALE__GPIO3_IO00		0x19
+			// MX8MP_IOMUXC_SAI2_MCLK__GPIO4_IO27		 0x19
 		>;
 	};
 
