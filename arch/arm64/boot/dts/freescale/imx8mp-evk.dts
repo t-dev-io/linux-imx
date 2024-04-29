@@ -299,6 +299,7 @@
 #endif
 };
 
+#if 0
 &flexspi {
 	// pinctrl-names = "default";
 	// pinctrl-0 = <&pinctrl_flexspi0>;
@@ -314,6 +315,7 @@
 		spi-rx-bus-width = <4>;
 	};
 };
+#endif
 
 &flexcan1 {
 	pinctrl-names = "default";
@@ -364,6 +366,22 @@
 
 &aud2htx {
 	status = "okay";
+};
+
+&ecspi1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_ecspi1>;
+	fsl,spi-num-chipselects = <1>;
+	cs-gpios = <&gpio5 9 GPIO_ACTIVE_LOW>;
+	status = "okay";
+
+	spi_flash: mx25l3206em2i@0 {
+		reg = <0x0>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "jedec,spi-nor";
+		spi-max-frequency = <8000000>;
+	};
 };
 
 #if 0
@@ -1048,6 +1066,15 @@
 	pinctrl_pwm2: pwm2grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_GPIO1_IO11__PWM2_OUT	0x116
+		>;
+	};
+
+	pinctrl_ecspi1: ecspi1grp {
+		fsl,pins = <
+			MX8MP_IOMUXC_ECSPI1_SCLK__ECSPI1_SCLK		0x82
+			MX8MP_IOMUXC_ECSPI1_MOSI__ECSPI1_MOSI		0x82
+			MX8MP_IOMUXC_ECSPI1_MISO__ECSPI1_MISO		0x82
+			MX8MP_IOMUXC_ECSPI1_SS0__GPIO5_IO09			0x82
 		>;
 	};
 

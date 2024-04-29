@@ -871,8 +871,9 @@ static int mtk_spi_probe(struct platform_device *pdev)
 
 		if (master->cs_gpios) {
 			for (i = 0; i < master->num_chipselect; i++) {
-				ret = devm_gpio_request(&pdev->dev,
+				ret = devm_gpio_request_one(&pdev->dev,
 							master->cs_gpios[i],
+							GPIOF_OUT_INIT_LOW,
 							dev_name(&pdev->dev));
 				if (ret) {
 					dev_err(&pdev->dev,
