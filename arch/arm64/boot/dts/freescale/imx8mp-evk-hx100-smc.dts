@@ -112,6 +112,13 @@
 	};
 };
 
+&usdhc2 {
+	/delete-property/ pinctrl-names; 
+	pinctrl-names = "default";
+	/delete-property/ pinctrl-0; 
+	/delete-property/ pinctrl-1; 
+};
+
 &iomuxc {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog>,<&pinctrl_m2_5g>;
