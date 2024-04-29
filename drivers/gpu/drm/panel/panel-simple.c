@@ -2864,6 +2864,29 @@ static const struct panel_desc kingdisplay_kd116n21_30nv_a010 = {
 	.connector_type = DRM_MODE_CONNECTOR_eDP,
 };
 
+static const struct display_timing lg_lm215wf3_timing = {
+	.pixelclock = { 60000000, 72000000, 87500000 },
+	.hactive = { 1920, 1920, 1920 },
+	.hfront_porch = { 16*2, 48*2, 48*2 },
+	.hback_porch = { 32*2, 48*2, 64*2 },
+	.hsync_len = { 16, 32, 48 },
+	.vactive = { 1080, 1080, 1080},
+	.vfront_porch = { 3, 8, 32 },
+	.vback_porch = { 3, 8, 32 },
+	.vsync_len = { 2, 4, 16 },
+	.flags = DISPLAY_FLAGS_DE_HIGH,
+};
+
+static const struct panel_desc lg_lm215wf3 = {
+	.timings = &lg_lm215wf3_timing,
+	.num_timings = 1,
+	.bpc = 8,
+	.size = {
+		.width = 570,
+		.height = 315,
+	},
+};
+
 static const struct display_timing jdi_tx26d202vm0bwa_timing = {
 	.pixelclock = { 151820000, 156720000, 159780000 },
 	.hactive = { 1920, 1920, 1920 },
@@ -4772,6 +4795,9 @@ static const struct of_device_id platform_of_match[] = {
 	}, {
 		.compatible = "jdi,tx26d202vm0bwa",
 		.data = &jdi_tx26d202vm0bwa,
+	},{
+		.compatible = "lg,lm215wf3",
+		.data = &lg_lm215wf3,
 	}, {
 		.compatible = "koe,tx14d24vm1bpa",
 		.data = &koe_tx14d24vm1bpa,

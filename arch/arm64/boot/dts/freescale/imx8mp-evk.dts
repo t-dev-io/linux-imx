@@ -107,6 +107,15 @@
 		enable-active-high;
 	};
 
+	lvds_bl_pwren: regulator-lvds-bl-pwren {
+		compatible = "regulator-fixed";
+		regulator-name = "lvds-bl-pwren";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpio4 19 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
+
 #if 0
 	reg_audio_pwr: regulator-audio-pwr {
 		compatible = "regulator-fixed";
@@ -216,7 +225,7 @@
 
 	lvds_backlight: lvds_backlight {
 		compatible = "pwm-backlight";
-		pwms = <&pwm2 0 100000>;
+		pwms = <&pwm1 0 100000>;
 		status = "okay";
 
 		brightness-levels = < 0  1  2  3  4  5  6  7  8  9
@@ -1265,8 +1274,9 @@
 		>;
 	};
 
-	pinctrl_typec: typec1grp {
+	pinctrl_lvds: lvdsgrp {
 		fsl,pins = <
+			MX8MP_IOMUXC_SAI1_RXC__GPIO4_IO01	0x1c4
 			MX8MP_IOMUXC_SAI1_TXD7__GPIO4_IO19	0x1c4
 		>;
 	};
