@@ -332,6 +332,8 @@ MODULE_PARM_DESC(macaddr, "FEC Ethernet MAC address");
 	((addr >= txq->tso_hdrs_dma) && \
 	(addr < txq->tso_hdrs_dma + txq->bd.ring_size * TSO_HEADER_SIZE))
 
+#define PHY_ID_AR8031   0x004dd074
+
 static int mii_cnt;
 
 static struct bufdesc *fec_enet_get_nextdesc(struct bufdesc *bdp,
@@ -4167,6 +4169,61 @@ static ssize_t harmonic_store(struct device *dev, struct device_attribute *attr,
 
 static DEVICE_ATTR(harmonic, S_IRUGO | S_IWUSR, harmonic_show, harmonic_store);
 
+int of_fec_enet_parse_fixup(struct device_node *np)
+{
+	int fixups = 0;
+
+	if (of_get_property(np, "fsl,ar8031-phy-fixup", NULL))
+		fixups |= FEC_QUIRK_AR8031_FIXUP;
+
+	return fixups;
+}
+
+static int ar8031_phy_fixup(struct phy_device *dev)
+{
+	u16 val;
+
+	/* Set RGMII IO voltage to 1.8V */
+	phy_write(dev, 0x1d, 0x1f);
+	phy_write(dev, 0x1e, 0x8);
+
+	/* Disable phy AR8031 SmartEEE function */
+	phy_write(dev, 0xd, 0x3);
+	phy_write(dev, 0xe, 0x805d);
+	phy_write(dev, 0xd, 0x4003);
+	val = phy_read(dev, 0xe);
+	val &= ~(0x1 << 8);
+	phy_write(dev, 0xe, val);
+
+	/* Introduce tx clock delay */
+	phy_write(dev, 0x1d, 0x5);
+	phy_write(dev, 0x1e, 0x100);
+
+	return 0;
+}
+
+
+void fec_enet_register_fixup(struct net_device *ndev)
+{
+	struct fec_enet_private *fep = netdev_priv(ndev);
+	int err;
+
+	if (!IS_BUILTIN(CONFIG_PHYLIB))
+		return;
+
+	if (fep->fixups & FEC_QUIRK_AR8031_FIXUP) {
+		static int ar8031_registered = 0;
+
+		if (ar8031_registered)
+			return;
+		err = phy_register_fixup_for_uid(PHY_ID_AR8031, 0xffffffef,
+					ar8031_phy_fixup);
+		if (err)
+			netdev_info(ndev, "Cannot register PHY board fixup\n");
+		ar8031_registered = 1;
+	}
+}
+
 static int
 fec_probe(struct platform_device *pdev)
 {
@@ -4406,6 +4463,9 @@ fec_probe(struct platform_device *pdev)
 
 	fep->rx_copybreak = COPYBREAK_DEFAULT;
 	INIT_WORK(&fep->tx_timeout_work, fec_enet_timeout_work);
+
+	fep->fixups = of_fec_enet_parse_fixup(np);
+	fec_enet_register_fixup(ndev);
 
 	ret = device_create_file(&pdev->dev, &dev_attr_mac);
 	if (ret)

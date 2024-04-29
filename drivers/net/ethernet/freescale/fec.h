@@ -506,6 +506,9 @@ struct bufdesc_ex {
 /* request pmqos during low power */
 #define FEC_QUIRK_HAS_PMQOS		(1 << 23)
 
+/* PHY fixup flag define */
+#define FEC_QUIRK_AR8031_FIXUP		(1 << 20)
+
 struct bufdesc_prop {
 	int qid;
 	/* Address of Rx and Tx buffers */
@@ -598,6 +601,7 @@ struct fec_enet_private {
 	int	wol_flag;
 	int	wake_irq;
 	u32	quirks;
+	u32 fixups;
 
 	struct	napi_struct napi;
 	int	csum_flags;
