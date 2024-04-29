@@ -24,6 +24,9 @@
 #include <linux/reset.h>
 #include <net/page_pool.h>
 
+/* PHY fixup flag define */
+#define EQOS_QUIRK_AR8031_FIXUP (1 << 20)
+
 struct stmmac_resources {
 	void __iomem *addr;
 	u8 mac[ETH_ALEN];
@@ -222,6 +225,7 @@ struct stmmac_priv {
 	/* Generic channel for NAPI */
 	struct stmmac_channel channel[STMMAC_CH_MAX];
 
+	u32 fixups;
 	int speed;
 	bool mdio_rst_after_resume;
 	unsigned int flow_ctrl;

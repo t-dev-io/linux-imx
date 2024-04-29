@@ -4169,7 +4169,7 @@ static ssize_t harmonic_store(struct device *dev, struct device_attribute *attr,
 
 static DEVICE_ATTR(harmonic, S_IRUGO | S_IWUSR, harmonic_show, harmonic_store);
 
-int of_fec_enet_parse_fixup(struct device_node *np)
+static int of_fec_enet_parse_fixup(struct device_node *np)
 {
 	int fixups = 0;
 
@@ -4183,6 +4183,7 @@ static int ar8031_phy_fixup(struct phy_device *dev)
 {
 	u16 val;
 
+	printk("fec ar8031_phy_fixup\n");
 	/* Set RGMII IO voltage to 1.8V */
 	phy_write(dev, 0x1d, 0x1f);
 	phy_write(dev, 0x1e, 0x8);
@@ -4203,7 +4204,7 @@ static int ar8031_phy_fixup(struct phy_device *dev)
 }
 
 
-void fec_enet_register_fixup(struct net_device *ndev)
+static void fec_enet_register_fixup(struct net_device *ndev)
 {
 	struct fec_enet_private *fep = netdev_priv(ndev);
 	int err;
