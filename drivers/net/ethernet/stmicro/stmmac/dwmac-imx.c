@@ -20,6 +20,7 @@
 #include <linux/regmap.h>
 #include <linux/slab.h>
 #include <linux/stmmac.h>
+#include <linux/of_gpio.h>  
 
 #include "stmmac_platform.h"
 
@@ -577,6 +578,23 @@ static int imx_dwmac_probe(struct platform_device *pdev)
 	struct imx_priv_data *dwmac;
 	const struct imx_dwmac_ops *data;
 	int ret;
+
+	struct device_node *chip = NULL;  
+	int chip_reset_gpio;  
+
+	chip_reset_gpio = of_get_named_gpio(chip, "phy-reset-gpios", 0);  
+	if (gpio_is_valid(chip_reset_gpio)) { 
+		ret = devm_gpio_request_one(&pdev->dev,chip_reset_gpio, GPIOF_OUT_INIT_LOW,
+					"phy-reset-gpios");
+		if (ret) {
+			pr_warn("failed to request phy-reset-gpios\n");
+		} else {
+			gpio_set_value_cansleep(chip_reset_gpio, 0);
+			mdelay(200);
+			gpio_set_value_cansleep(chip_reset_gpio, 1);
+			mdelay(200);
+		}
+	}
 
 	ret = stmmac_get_platform_resources(pdev, &stmmac_res);
 	if (ret)
