@@ -3831,6 +3831,342 @@ out:
 	return ret;
 }
 
+static ssize_t mac_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+    return sprintf(buf,"%x:%x:%x:%x:%x:%x\n", macaddr[0], macaddr[1],macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
+}
+
+static ssize_t mac_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	char *ptr;
+	const char *p=buf;
+	int i = 0, j, ret;
+	unsigned long tmp;
+	struct sockaddr pa;
+	struct net_device *ndev;
+	struct platform_device *pdev;
+
+	pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+
+	while (p && (*p) && i < ETH_ALEN) {
+		ptr = strchr(p, ':');
+		if (ptr)
+			*ptr++ = '\0';
+
+		if (strlen(p)) {
+			ret = kstrtoul(p, 16, &tmp);
+			if (ret < 0 || tmp > 0xff)
+				break;
+			//make sure the mac is not multicast addr, sa_data[0]&0x01 is not ture.
+			if(i == 0)
+				pa.sa_data[i++] = tmp & 0xFE;
+			else
+				pa.sa_data[i++] = tmp;
+		}
+		p = ptr;
+	}
+
+	if(i == ETH_ALEN)
+	{
+		for (j = 0; j < ETH_ALEN; j++)
+		{
+			macaddr[j] = pa.sa_data[j];
+		}
+		fec_set_mac_address(ndev, &pa);
+	}
+
+	return size;
+}
+
+static DEVICE_ATTR(mac, S_IRUGO | S_IWUSR, mac_show, mac_store);
+
+static ssize_t template_1000base_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+	struct net_device *ndev;
+	struct platform_device *pdev;
+	struct fec_enet_private *fep;
+	unsigned short tmp[4];
+	pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+	fep = netdev_priv(ndev);
+	tmp[0] =  phy_read(ndev->phydev, 0x10);
+	tmp[1] =  phy_read(ndev->phydev, 0x1d);
+	tmp[2] =  phy_read(ndev->phydev, 0x1e);
+	tmp[3] =  phy_read(ndev->phydev, 0x24);
+	return sprintf(buf,"0x10 = 0x%x  0x1d =0x%x 0x1e = 0x%x 0x24 = 0x%x\n", tmp[0], tmp[1],tmp[2], tmp[3]);
+}
+
+static ssize_t template_1000base_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+	struct platform_device *pdev;
+	struct fec_enet_private *fep;
+	unsigned int tmp;
+
+	pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+	fep = netdev_priv(ndev);
+	tmp = simple_strtoul(buf, NULL, 0);
+	if(tmp == 1 ){
+		phy_write(ndev->phydev, 0x10, 0x0800);
+		phy_write(ndev->phydev, 0x1d, 0x000b);
+		phy_write(ndev->phydev, 0x1e, 0x0009);
+		phy_write(ndev->phydev, 0x1d, 0x0004);
+		phy_write(ndev->phydev, 0x1e, 0xfbbb);
+		phy_write(ndev->phydev, 0x00, 0x8140);
+		phy_write(ndev->phydev, 0x09, 0x2200);
+	}
+	return size;
+}
+static DEVICE_ATTR(template_1000base, S_IRUGO | S_IWUSR, template_1000base_show, template_1000base_store);
+
+static ssize_t  jitter_master_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+	struct net_device *ndev;
+	struct platform_device *pdev;
+	struct fec_enet_private *fep;
+	unsigned short tmp[4];
+	pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+	fep = netdev_priv(ndev);
+	tmp[0] =  phy_read(ndev->phydev, 0x10);
+	tmp[1] =  phy_read(ndev->phydev, 0x1d);
+	tmp[2] =  phy_read(ndev->phydev, 0x1e);
+	tmp[3] =  phy_read(ndev->phydev, 0x00);
+	return sprintf(buf,"0x10 =0x%x  0x1d =0x%x 0x1e = 0x%x 0x00 = 0x%x \n", tmp[0], tmp[1],tmp[2], tmp[3]);
+}
+
+
+static ssize_t jitter_master_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+	struct platform_device *pdev;
+	struct fec_enet_private *fep;
+	unsigned int tmp;
+
+	pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+	fep = netdev_priv(ndev);
+	tmp = simple_strtoul(buf, NULL, 0);
+	if(tmp == 1 ){
+		phy_write(ndev->phydev, 0x10, 0x0800);
+		phy_write(ndev->phydev, 0x1d, 0x000b);
+		phy_write(ndev->phydev, 0x1e, 0x0009);
+		phy_write(ndev->phydev, 0x00, 0x8140);
+		phy_write(ndev->phydev, 0x09, 0x4200);
+	}
+	return size;
+}
+static DEVICE_ATTR(jitter_master, S_IRUGO | S_IWUSR, jitter_master_show, jitter_master_store);
+
+static ssize_t distortion_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+	struct net_device *ndev;
+	struct platform_device *pdev;
+	struct fec_enet_private *fep;
+	unsigned short tmp[4];
+	pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+	fep = netdev_priv(ndev);
+	tmp[0] =  phy_read(ndev->phydev, 0x10);
+	tmp[1] =  phy_read(ndev->phydev, 0x1d);
+	tmp[2] =  phy_read(ndev->phydev, 0x1e);
+	tmp[3] =  phy_read(ndev->phydev, 0x00);
+	tmp[4] =  phy_read(ndev->phydev, 0x09);
+	return sprintf(buf,"0x10 = 0x%x  0x1d =0x%x 0x1e =0x %x 0x00 = 0x%x  0x09 = 0x%x \n", tmp[0], tmp[1],tmp[2], tmp[3], tmp[4]);
+}
+
+
+static ssize_t  distortion_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+	struct platform_device *pdev;
+	struct fec_enet_private *fep;
+	unsigned int tmp;
+
+	pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+	fep = netdev_priv(ndev);
+	tmp = simple_strtoul(buf, NULL, 0);
+	if(tmp == 1 ){
+		phy_write(ndev->phydev, 0x10, 0x0800);
+		phy_write(ndev->phydev, 0x1d, 0x000b);
+		phy_write(ndev->phydev, 0x1e, 0x0009);
+		phy_write(ndev->phydev, 0x00, 0x8140);
+		phy_write(ndev->phydev, 0x09, 0x8200);
+	}
+	return size;
+}
+
+static DEVICE_ATTR(distortion, S_IRUGO | S_IWUSR, distortion_show, distortion_store);
+
+static ssize_t template_100base_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+	struct net_device *ndev;
+	struct platform_device *pdev;
+	struct fec_enet_private *fep;
+	unsigned short tmp[4];
+	pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+	fep = netdev_priv(ndev);
+	tmp[0] =  phy_read(ndev->phydev, 0x10);
+	tmp[1] =  phy_read(ndev->phydev, 0x00);
+	tmp[2] =  phy_read(ndev->phydev, 0x1d);
+	tmp[3] =  phy_read(ndev->phydev, 0x1e);
+	return sprintf(buf,"0x10 =0x %x  0x00 =0x %x 0x1d = 0x%x 0x1e = 0x%x \n", tmp[0], tmp[1],tmp[2], tmp[3]);
+}
+
+static ssize_t template_100base_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+	struct platform_device *pdev;
+	struct fec_enet_private *fep;
+	unsigned int tmp;
+
+	pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+	fep = netdev_priv(ndev);
+	tmp = simple_strtoul(buf, NULL, 0);
+	if(tmp == 1 ){
+		phy_write(ndev->phydev, 0x10, 0x0800);
+		phy_write(ndev->phydev, 0x00, 0xA100);
+		phy_write(ndev->phydev, 0x1d, 0x0029);
+		phy_write(ndev->phydev, 0x1e, 0x36dc);
+		phy_write(ndev->phydev, 0x1d, 0x000b);
+		phy_write(ndev->phydev, 0x1e, 0x3c40);
+	}
+	return size;
+}
+
+static DEVICE_ATTR(template_100base, S_IRUGO | S_IWUSR, template_100base_show, template_100base_store);
+
+static ssize_t link_pulse_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+	struct net_device *ndev;
+	struct platform_device *pdev;
+	struct fec_enet_private *fep;
+	unsigned short tmp[4];
+	pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+	fep = netdev_priv(ndev);
+	tmp[0] =  phy_read(ndev->phydev, 0x10);
+	tmp[1] =  phy_read(ndev->phydev, 0x00);
+	tmp[2] =  phy_read(ndev->phydev, 0x1d);
+	tmp[3] =  phy_read(ndev->phydev, 0x1e);
+	return sprintf(buf,"0x10 =0x %x  0x00 = 0x%x 0x1d =0x %x 0x1e = 0x%x \n", tmp[0], tmp[1],tmp[2], tmp[3]);
+}
+
+static ssize_t link_pulse_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+	struct platform_device *pdev;
+	struct fec_enet_private *fep;
+	unsigned int tmp;
+
+	pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+	fep = netdev_priv(ndev);
+	tmp = simple_strtoul(buf, NULL, 0);
+	if(tmp == 1 ){
+		phy_write(ndev->phydev, 0x10, 0x0800);
+		phy_write(ndev->phydev, 0x00, 0x8100);
+		phy_write(ndev->phydev, 0x1d, 0x0029);
+		phy_write(ndev->phydev, 0x1e, 0x36dc);
+		phy_write(ndev->phydev, 0x1d, 0x000b);
+		phy_write(ndev->phydev, 0x1e, 0x3c40);
+		phy_write(ndev->phydev, 0x1d, 0x0012);
+		phy_write(ndev->phydev, 0x1e, 0x4c0f);
+	}
+	return size;
+}
+
+static DEVICE_ATTR(link_pulse, S_IRUGO | S_IWUSR, link_pulse_show, link_pulse_store);
+
+static ssize_t mau_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+    struct net_device *ndev;
+	struct platform_device *pdev;
+	struct fec_enet_private *fep;
+    unsigned short tmp[4];
+    pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+	fep = netdev_priv(ndev);
+	tmp[0] =  phy_read(ndev->phydev, 0x10);
+    tmp[1] =  phy_read(ndev->phydev, 0x00);
+	tmp[2] =  phy_read(ndev->phydev, 0x1d);
+	tmp[3] =  phy_read(ndev->phydev, 0x1e);
+    return sprintf(buf,"0x10 =0x %x  0x00 = 0x%x 0x1d =0x %x  0x1e = 0x%x\n", tmp[0], tmp[1],tmp[2], tmp[3]);
+}
+
+static ssize_t mau_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+	struct platform_device *pdev;
+	struct fec_enet_private *fep;
+	unsigned int tmp;
+
+	pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+	fep = netdev_priv(ndev);
+	tmp = simple_strtoul(buf, NULL, 0);
+	if(tmp == 1 ){
+		phy_write(ndev->phydev, 0x10, 0x0800);
+		phy_write(ndev->phydev, 0x00, 0x8100);
+		phy_write(ndev->phydev, 0x1d, 0x0029);
+		phy_write(ndev->phydev, 0x1e, 0x36dc);
+		phy_write(ndev->phydev, 0x1d, 0x000b);
+		phy_write(ndev->phydev, 0x1e, 0x3c40);
+		phy_write(ndev->phydev, 0x1d, 0x0012);
+		phy_write(ndev->phydev, 0x1e, 0x4c0e);
+	}
+	return size;
+}
+
+static DEVICE_ATTR(mau, S_IRUGO | S_IWUSR, mau_show, mau_store);
+
+static ssize_t harmonic_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+	struct net_device *ndev;
+	struct platform_device *pdev;
+	struct fec_enet_private *fep;
+	unsigned short tmp[4];
+	pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+	fep = netdev_priv(ndev);
+	tmp[0] =  phy_read(ndev->phydev, 0x10);
+	tmp[1] =  phy_read(ndev->phydev, 0x00);
+	tmp[2] =  phy_read(ndev->phydev, 0x1d);
+	tmp[3] =  phy_read(ndev->phydev, 0x1e);
+	return sprintf(buf,"0x10 = 0x%x  0x00 = 0x%x 0x1d = 0x%x 0x1e = 0x%x\n", tmp[0], tmp[1],tmp[2], tmp[3]);
+}
+
+static ssize_t harmonic_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+	struct platform_device *pdev;
+	struct fec_enet_private *fep;
+	unsigned int tmp;
+
+	pdev = container_of(dev, struct platform_device, dev);
+	ndev = platform_get_drvdata(pdev);
+	fep = netdev_priv(ndev);
+	tmp = simple_strtoul(buf, NULL, 0);
+	if(tmp == 1 ){
+		phy_write(ndev->phydev, 0x10, 0x0800);
+		phy_write(ndev->phydev, 0x00, 0x8100);
+		phy_write(ndev->phydev, 0x1d, 0x0029);
+		phy_write(ndev->phydev, 0x1e, 0x36dc);
+		phy_write(ndev->phydev, 0x1d, 0x000b);
+		phy_write(ndev->phydev, 0x1e, 0x3c40);
+		phy_write(ndev->phydev, 0x1d, 0x0012);
+		phy_write(ndev->phydev, 0x1e, 0x4c0d);
+	}
+	return size;
+}
+
+static DEVICE_ATTR(harmonic, S_IRUGO | S_IWUSR, harmonic_show, harmonic_store);
+
 static int
 fec_probe(struct platform_device *pdev)
 {
@@ -4070,6 +4406,32 @@ fec_probe(struct platform_device *pdev)
 
 	fep->rx_copybreak = COPYBREAK_DEFAULT;
 	INIT_WORK(&fep->tx_timeout_work, fec_enet_timeout_work);
+
+	ret = device_create_file(&pdev->dev, &dev_attr_mac);
+	if (ret)
+		printk("could not create file attrbute: mac\n");
+
+	ret = device_create_file(&pdev->dev, &dev_attr_template_1000base);
+	if (ret)
+		printk("could not create file attrbute: 1000 base template/peak /volt/droop \n");
+	ret = device_create_file(&pdev->dev, &dev_attr_jitter_master);
+	if (ret)
+		printk("could not create file attrbute: jitter_master mode  \n");
+	ret = device_create_file(&pdev->dev, &dev_attr_distortion);
+	if (ret)
+		printk("could not create file attrbute: distortion  \n");
+	ret = device_create_file(&pdev->dev, &dev_attr_template_100base);
+	if (ret)
+		printk("could not create file attrbute: distortion  \n");
+	ret = device_create_file(&pdev->dev, &dev_attr_link_pulse);
+	if (ret)
+		printk("could not create file attrbute: distortion  \n");
+	ret = device_create_file(&pdev->dev, &dev_attr_mau);
+	if (ret)
+		printk("could not create file attrbute: mau  \n");
+	ret = device_create_file(&pdev->dev, &dev_attr_harmonic);
+	if (ret)
+		printk("could not create file attrbute: harmonic  \n");
 
 	pm_runtime_mark_last_busy(&pdev->dev);
 	pm_runtime_put_autosuspend(&pdev->dev);

@@ -287,6 +287,236 @@ imx_dwmac_parse_dt(struct imx_priv_data *dwmac, struct device *dev)
 	return err;
 }
 
+static ssize_t template_1000base_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+	struct net_device *ndev;
+	unsigned short tmp[4];
+	ndev = dev_get_drvdata(dev);
+	tmp[0] =  phy_read(ndev->phydev, 0x10);
+	tmp[1] =  phy_read(ndev->phydev, 0x1d);
+	tmp[2] =  phy_read(ndev->phydev, 0x1e);
+	tmp[3] =  phy_read(ndev->phydev, 0x24);
+	return sprintf(buf,"0x10 = 0x%x  0x1d =0x%x 0x1e = 0x%x 0x24 = 0x%x\n", tmp[0], tmp[1],tmp[2], tmp[3]);
+}
+
+static ssize_t template_1000base_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+	unsigned int tmp;
+
+	ndev = dev_get_drvdata(dev);
+	tmp = simple_strtoul(buf, NULL, 0);
+	if(tmp == 1 ){
+		phy_write(ndev->phydev, 0x10, 0x0800);
+		phy_write(ndev->phydev, 0x1d, 0x000b);
+		phy_write(ndev->phydev, 0x1e, 0x0009);
+		phy_write(ndev->phydev, 0x1d, 0x0004);
+		phy_write(ndev->phydev, 0x1e, 0xfbbb);
+		phy_write(ndev->phydev, 0x00, 0x8140);
+		phy_write(ndev->phydev, 0x09, 0x2200);
+	}
+	return size;
+}
+static DEVICE_ATTR(template_1000base, S_IRUGO | S_IWUSR, template_1000base_show, template_1000base_store);
+
+static ssize_t jitter_master_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+	struct net_device *ndev;
+	unsigned short tmp[4];
+	ndev = dev_get_drvdata(dev);
+	tmp[0] =  phy_read(ndev->phydev, 0x10);
+	tmp[1] =  phy_read(ndev->phydev, 0x1d);
+	tmp[2] =  phy_read(ndev->phydev, 0x1e);
+	tmp[3] =  phy_read(ndev->phydev, 0x00);
+	return sprintf(buf,"0x10 =0x%x  0x1d =0x%x 0x1e = 0x%x 0x00 = 0x%x \n", tmp[0], tmp[1],tmp[2], tmp[3]);
+}
+
+static ssize_t jitter_master_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+	unsigned int tmp;
+
+	ndev = dev_get_drvdata(dev);
+	tmp = simple_strtoul(buf, NULL, 0);
+	if(tmp == 1 ){
+		phy_write(ndev->phydev, 0x10, 0x0800);
+		phy_write(ndev->phydev, 0x1d, 0x000b);
+		phy_write(ndev->phydev, 0x1e, 0x0009);
+		phy_write(ndev->phydev, 0x00, 0x8140);
+		phy_write(ndev->phydev, 0x09, 0x4200);
+	}
+	return size;
+}
+static DEVICE_ATTR(jitter_master, S_IRUGO | S_IWUSR, jitter_master_show, jitter_master_store);
+
+static ssize_t distortion_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+	struct net_device *ndev;
+	unsigned short tmp[4];
+	ndev = dev_get_drvdata(dev);
+	tmp[0] =  phy_read(ndev->phydev, 0x10);
+	tmp[1] =  phy_read(ndev->phydev, 0x1d);
+	tmp[2] =  phy_read(ndev->phydev, 0x1e);
+	tmp[3] =  phy_read(ndev->phydev, 0x00);
+	tmp[4] =  phy_read(ndev->phydev, 0x09);
+	return sprintf(buf,"0x10 = 0x%x  0x1d =0x%x 0x1e =0x %x 0x00 = 0x%x  0x09 = 0x%x \n", tmp[0], tmp[1],tmp[2], tmp[3], tmp[4]);
+}
+
+static ssize_t  distortion_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+	unsigned int tmp;
+
+	ndev = dev_get_drvdata(dev);
+	tmp = simple_strtoul(buf, NULL, 0);
+	if(tmp == 1 ){
+		phy_write(ndev->phydev, 0x10, 0x0800);
+		phy_write(ndev->phydev, 0x1d, 0x000b);
+		phy_write(ndev->phydev, 0x1e, 0x0009);
+		phy_write(ndev->phydev, 0x00, 0x8140);
+		phy_write(ndev->phydev, 0x09, 0x8200);
+	}
+	return size;
+}
+
+static DEVICE_ATTR(distortion, S_IRUGO | S_IWUSR, distortion_show, distortion_store);
+
+static ssize_t template_100base_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+	struct net_device *ndev;
+	unsigned short tmp[4];
+	ndev = dev_get_drvdata(dev);
+	tmp[0] =  phy_read(ndev->phydev, 0x10);
+	tmp[1] =  phy_read(ndev->phydev, 0x00);
+	tmp[2] =  phy_read(ndev->phydev, 0x1d);
+	tmp[3] =  phy_read(ndev->phydev, 0x1e);
+	return sprintf(buf,"0x10 =0x %x  0x00 =0x %x 0x1d = 0x%x 0x1e = 0x%x \n", tmp[0], tmp[1],tmp[2], tmp[3]);
+}
+
+static ssize_t template_100base_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+	unsigned int tmp;
+
+	ndev = dev_get_drvdata(dev);
+	tmp = simple_strtoul(buf, NULL, 0);
+	if(tmp == 1 ){
+		phy_write(ndev->phydev, 0x10, 0x0800);
+		phy_write(ndev->phydev, 0x00, 0xA100);
+		phy_write(ndev->phydev, 0x1d, 0x0029);
+		phy_write(ndev->phydev, 0x1e, 0x36dc);
+		phy_write(ndev->phydev, 0x1d, 0x000b);
+		phy_write(ndev->phydev, 0x1e, 0x3c40);
+	}
+	return size;
+}
+static DEVICE_ATTR(template_100base, S_IRUGO | S_IWUSR, template_100base_show, template_100base_store);
+
+static ssize_t link_pulse_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+	struct net_device *ndev;
+	unsigned short tmp[4];
+
+	ndev = dev_get_drvdata(dev);
+	tmp[0] =  phy_read(ndev->phydev, 0x10);
+	tmp[1] =  phy_read(ndev->phydev, 0x00);
+	tmp[2] =  phy_read(ndev->phydev, 0x1d);
+	tmp[3] =  phy_read(ndev->phydev, 0x1e);
+	return sprintf(buf,"0x10 =0x %x  0x00 = 0x%x 0x1d =0x %x 0x1e = 0x%x \n", tmp[0], tmp[1],tmp[2], tmp[3]);
+}
+
+static ssize_t link_pulse_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+	unsigned int tmp;
+
+	ndev = dev_get_drvdata(dev);
+	tmp = simple_strtoul(buf, NULL, 0);
+	if(tmp == 1 ){
+		phy_write(ndev->phydev, 0x10, 0x0800);
+		phy_write(ndev->phydev, 0x00, 0x8100);
+		phy_write(ndev->phydev, 0x1d, 0x0029);
+		phy_write(ndev->phydev, 0x1e, 0x36dc);
+		phy_write(ndev->phydev, 0x1d, 0x000b);
+		phy_write(ndev->phydev, 0x1e, 0x3c40);
+		phy_write(ndev->phydev, 0x1d, 0x0012);
+		phy_write(ndev->phydev, 0x1e, 0x4c0f);
+	}
+	return size;
+}
+
+static DEVICE_ATTR(link_pulse, S_IRUGO | S_IWUSR, link_pulse_show, link_pulse_store);
+
+static ssize_t mau_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+	struct net_device *ndev;
+	unsigned short tmp[4];
+
+	ndev = dev_get_drvdata(dev);
+	tmp[0] =  phy_read(ndev->phydev, 0x10);
+	tmp[1] =  phy_read(ndev->phydev, 0x00);
+	tmp[2] =  phy_read(ndev->phydev, 0x1d);
+	tmp[3] =  phy_read(ndev->phydev, 0x1e);
+	return sprintf(buf,"0x10 =0x %x  0x00 = 0x%x 0x1d =0x %x  0x1e = 0x%x\n", tmp[0], tmp[1],tmp[2], tmp[3]);
+}
+
+static ssize_t mau_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+	unsigned int tmp;
+
+	ndev = dev_get_drvdata(dev);
+	tmp = simple_strtoul(buf, NULL, 0);
+	if(tmp == 1 ){
+		phy_write(ndev->phydev, 0x10, 0x0800);
+		phy_write(ndev->phydev, 0x00, 0x8100);
+		phy_write(ndev->phydev, 0x1d, 0x0029);
+		phy_write(ndev->phydev, 0x1e, 0x36dc);
+		phy_write(ndev->phydev, 0x1d, 0x000b);
+		phy_write(ndev->phydev, 0x1e, 0x3c40);
+		phy_write(ndev->phydev, 0x1d, 0x0012);
+		phy_write(ndev->phydev, 0x1e, 0x4c0e);
+	}
+	return size;
+}
+
+static DEVICE_ATTR(mau, S_IRUGO | S_IWUSR, mau_show, mau_store);
+
+static ssize_t harmonic_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+	struct net_device *ndev;
+	unsigned short tmp[4];
+
+	ndev = dev_get_drvdata(dev);
+	tmp[0] =  phy_read(ndev->phydev, 0x10);
+	tmp[1] =  phy_read(ndev->phydev, 0x00);
+	tmp[2] =  phy_read(ndev->phydev, 0x1d);
+	tmp[3] =  phy_read(ndev->phydev, 0x1e);
+	return sprintf(buf,"0x10 = 0x%x  0x00 = 0x%x 0x1d = 0x%x 0x1e = 0x%x\n", tmp[0], tmp[1],tmp[2], tmp[3]);
+}
+
+static ssize_t harmonic_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+	unsigned int tmp;
+
+	ndev = dev_get_drvdata(dev);
+	tmp = simple_strtoul(buf, NULL, 0);
+	if(tmp == 1 ){
+		phy_write(ndev->phydev, 0x10, 0x0800);
+		phy_write(ndev->phydev, 0x00, 0x8100);
+		phy_write(ndev->phydev, 0x1d, 0x0029);
+		phy_write(ndev->phydev, 0x1e, 0x36dc);
+		phy_write(ndev->phydev, 0x1d, 0x000b);
+		phy_write(ndev->phydev, 0x1e, 0x3c40);
+		phy_write(ndev->phydev, 0x1d, 0x0012);
+		phy_write(ndev->phydev, 0x1e, 0x4c0d);
+	}
+	return size;
+}
+
+static DEVICE_ATTR(harmonic, S_IRUGO | S_IWUSR, harmonic_show, harmonic_store);
+
 static int imx_dwmac_probe(struct platform_device *pdev)
 {
 	struct plat_stmmacenet_data *plat_dat;
@@ -342,6 +572,28 @@ static int imx_dwmac_probe(struct platform_device *pdev)
 	ret = stmmac_dvr_probe(&pdev->dev, plat_dat, &stmmac_res);
 	if (ret)
 		goto err_drv_probe;
+
+	ret = device_create_file(&pdev->dev, &dev_attr_template_1000base);
+	if (ret)
+		printk("could not create file attrbute: 1000 base template/peak /volt/droop \n");
+	ret = device_create_file(&pdev->dev, &dev_attr_jitter_master);
+	if (ret)
+		printk("could not create file attrbute: jitter_master mode  \n");
+	ret = device_create_file(&pdev->dev, &dev_attr_distortion);
+	if (ret)
+		printk("could not create file attrbute: distortion  \n");
+	ret = device_create_file(&pdev->dev, &dev_attr_template_100base);
+	if (ret)
+		printk("could not create file attrbute: distortion  \n");
+	ret = device_create_file(&pdev->dev, &dev_attr_link_pulse);
+	if (ret)
+		printk("could not create file attrbute: distortion  \n");
+	ret = device_create_file(&pdev->dev, &dev_attr_mau);
+	if (ret)
+		printk("could not create file attrbute: mau  \n");
+	ret = device_create_file(&pdev->dev, &dev_attr_harmonic);
+	if (ret)
+		printk("could not create file attrbute: harmonic  \n");
 
 	return 0;
 
