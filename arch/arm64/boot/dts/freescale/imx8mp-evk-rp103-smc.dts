@@ -137,6 +137,7 @@
 		interrupts = <7 GPIO_ACTIVE_LOW>;
         //PWENB-supply = <&reg_audio>;
         amic-mono;
+		realtek,in1-differential;
         status = "okay";
     };
 };
