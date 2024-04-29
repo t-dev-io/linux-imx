@@ -30,6 +30,9 @@
 #include <linux/platform_device.h>
 #include <linux/regmap.h>
 #include <linux/watchdog.h>
+#include <linux/mfd/syscon.h>
+#include <linux/mfd/syscon/imx6q-iomuxc-gpr.h>
+#include <linux/gpio.h>
 
 #define DRIVER_NAME "imx2-wdt"
 
@@ -63,10 +66,13 @@
 struct imx2_wdt_device {
 	struct clk *clk;
 	struct regmap *regmap;
+	struct regmap *rgpio;
 	struct watchdog_device wdog;
 	bool ext_reset;
 	bool clk_is_on;
 };
+
+extern int rebootReason;
 
 static bool nowayout = WATCHDOG_NOWAYOUT;
 module_param(nowayout, bool, 0);
@@ -310,6 +316,13 @@ static int __init imx2_wdt_probe(struct platform_device *pdev)
 	regmap_read(wdev->regmap, IMX2_WDT_WRSR, &val);
 	wdog->bootstatus = val & IMX2_WDT_WRSR_TOUT ? WDIOF_CARDRESET : 0;
 
+	wdev->rgpio = syscon_regmap_lookup_by_phandle(pdev->dev.of_node, "muxgpio");
+	if(IS_ERR(wdev->rgpio)) {
+		printk("get muxgpio fail wdev->muxgpio:%p \n",wdev->rgpio);
+		wdev->rgpio = NULL;
+	} else {
+		printk("get muxgpio \n");
+	}
 	wdev->ext_reset = of_property_read_bool(dev->of_node,
 						"fsl,ext-reset-output");
 	platform_set_drvdata(pdev, wdog);
@@ -338,6 +351,8 @@ static void imx2_wdt_shutdown(struct platform_device *pdev)
 {
 	struct watchdog_device *wdog = platform_get_drvdata(pdev);
 	struct imx2_wdt_device *wdev = watchdog_get_drvdata(wdog);
+	int gpio_wdog = 32*0 + 2 ;
+	int err = 0;
 
 	if (imx2_wdt_is_running(wdev)) {
 		/*
@@ -347,6 +362,13 @@ static void imx2_wdt_shutdown(struct platform_device *pdev)
 		imx2_wdt_set_timeout(wdog, IMX2_WDT_MAX_TIME);
 		imx2_wdt_ping(wdog);
 		dev_crit(&pdev->dev, "Device shutdown: Expect reboot!\n");
+	}
+	//set to gpio
+	if(wdev->rgpio != NULL  && (rebootReason ==0)) {
+		regmap_write(wdev->rgpio, 0x030,0x00);
+		err = gpio_request(gpio_wdog, "gpio_wdog");
+		printk("request wdog gpio ret:%d \n",err);
+		gpio_direction_output(gpio_wdog, 0);
 	}
 }
 

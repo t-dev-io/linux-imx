@@ -26,6 +26,8 @@
 int C_A_D = 1;
 struct pid *cad_pid;
 EXPORT_SYMBOL(cad_pid);
+int rebootReason = 0;
+EXPORT_SYMBOL(rebootReason);
 
 #if defined(CONFIG_ARM)
 #define DEFAULT_REBOOT_MODE		= REBOOT_HARD
@@ -244,6 +246,10 @@ void migrate_to_reboot_cpu(void)
  */
 void kernel_restart(char *cmd)
 {
+	if((cmd != NULL ) && (strncmp(cmd,"shutdown",8) == 0)) {
+		rebootReason = 1;
+		kernel_power_off();
+	}
 	kernel_restart_prepare(cmd);
 	migrate_to_reboot_cpu();
 	syscore_shutdown();
