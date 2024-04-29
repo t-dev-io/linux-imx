@@ -13,7 +13,7 @@
 	compatible = "fsl,imx8mp-evk", "fsl,imx8mp";
 
 	chosen {
-		stdout-path = &uart1;
+		stdout-path = &uart2;
 	};
 
 	gpio-leds {
