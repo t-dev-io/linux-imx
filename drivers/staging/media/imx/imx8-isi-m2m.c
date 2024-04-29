@@ -41,6 +41,20 @@
 struct mxc_isi_fmt mxc_isi_input_formats[] = {
 	/* Pixel link input format */
 	{
+		.name		= "GREY",
+		.fourcc		= V4L2_PIX_FMT_GREY,
+		.depth		= { 8 },
+		.color =	MXC_ISI_M2M_IN_FMT_RGB8P,//need to check this, just for test now
+		.memplanes	= 1,
+		.colplanes	= 1,
+	}, {
+		.name		= "GREY10",
+		.fourcc		= V4L2_PIX_FMT_Y10,
+		.depth		= { 16 },
+		.color =	MXC_ISI_M2M_IN_FMT_A2BGR10,//need to check this, just for test now
+		.memplanes	= 1,
+		.colplanes	= 1,
+	}, {
 		.name		= "XBGR32",
 		.fourcc		= V4L2_PIX_FMT_XBGR32,
 		.depth		= { 32 },

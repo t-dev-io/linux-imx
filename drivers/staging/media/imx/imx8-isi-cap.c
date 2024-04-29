@@ -54,6 +54,18 @@ struct mxc_isi_fmt mxc_isi_src_formats[] = {
 		.memplanes	= 1,
 		.colplanes	= 1,
 		.align		= 2,
+	}, {
+		.name		= "GRAY",
+		.fourcc		= V4L2_PIX_FMT_GREY,
+		.depth		= { 8 },
+		.memplanes	= 1,
+		.colplanes	= 1,
+	}, {
+		.name		= "GRAY10",
+		.fourcc		= V4L2_PIX_FMT_Y10P,
+		.depth		= { 16 },
+		.memplanes	= 1,
+		.colplanes	= 1,
 	}
 };
 
@@ -99,6 +111,10 @@ struct mxc_isi_fmt *mxc_isi_get_src_fmt(struct v4l2_subdev_format *sd_fmt)
 	    sd_fmt->format.code == MEDIA_BUS_FMT_UYVY8_2X8 ||
 	    sd_fmt->format.code == MEDIA_BUS_FMT_YUYV8_2X8)
 		index = 1;
+	else if (sd_fmt->format.code == MEDIA_BUS_FMT_Y8_1X8)
+		index = 2;
+	else if (sd_fmt->format.code == MEDIA_BUS_FMT_Y10_1X10)
+		index = 3;
 	else
 		index = 0;
 	return &mxc_isi_src_formats[index];
@@ -673,7 +689,13 @@ static int isi_cap_fmt_init(struct mxc_isi_cap_dev *isi_cap)
 	}
 
 	memset(&src_fmt, 0, sizeof(src_fmt));
-	src_fmt.which = V4L2_SUBDEV_FORMAT_ACTIVE;
+	if (dst_f->fmt->mbus_code == MEDIA_BUS_FMT_Y8_1X8){
+		src_fmt.format.code = MEDIA_BUS_FMT_Y8_1X8;
+	} else if (dst_f->fmt->mbus_code == MEDIA_BUS_FMT_Y10_1X10) {
+		src_fmt.format.code = MEDIA_BUS_FMT_Y10_1X10;
+	} else {
+		src_fmt.format.code = MEDIA_BUS_FMT_UYVY8_2X8;
+	}
 	ret = v4l2_subdev_call(src_sd, pad, get_fmt, NULL, &src_fmt);
 	if (ret < 0 && ret != -ENOIOCTLCMD) {
 		v4l2_err(&isi_cap->sd, "get remote fmt fail!\n");

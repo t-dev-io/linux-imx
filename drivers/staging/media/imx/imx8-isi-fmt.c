@@ -8,6 +8,22 @@
 
 struct mxc_isi_fmt mxc_isi_out_formats[] = {
 	{
+		.name		= "GREY",
+		.fourcc		= V4L2_PIX_FMT_GREY,
+		.depth		= { 8 },
+		.color		= MXC_ISI_OUT_FMT_RAW8,
+		.memplanes	= 1,
+		.colplanes	= 1,
+		.mbus_code  = MEDIA_BUS_FMT_Y8_1X8,
+	}, {
+		.name		= "GREY10",
+		.fourcc		= V4L2_PIX_FMT_Y10P,
+		.depth		= { 16 },
+		.color		= MXC_ISI_OUT_FMT_RAW10,
+		.memplanes	= 1,
+		.colplanes	= 1,
+		.mbus_code  = MEDIA_BUS_FMT_Y10_1X10,
+	},{
 		.name		= "RGB565",
 		.fourcc		= V4L2_PIX_FMT_RGB565,
 		.depth		= { 16 },
@@ -84,15 +100,6 @@ struct mxc_isi_fmt mxc_isi_out_formats[] = {
 		.fourcc		= V4L2_PIX_FMT_XBGR32,
 		.depth		= { 32 },
 		.color		= MXC_ISI_OUT_FMT_XRGB32,
-		.memplanes	= 1,
-		.colplanes	= 1,
-		.align		= 2,
-		.mbus_code	= MEDIA_BUS_FMT_RGB888_1X24,
-	}, {
-		.name		= "ABGR32",
-		.fourcc		= V4L2_PIX_FMT_ABGR32,
-		.depth		= { 32 },
-		.color		= MXC_ISI_OUT_FMT_ARGB32,
 		.memplanes	= 1,
 		.colplanes	= 1,
 		.align		= 2,
