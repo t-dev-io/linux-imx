@@ -6,17 +6,13 @@
 #include "imx8mp-evk.dts"
 
 / {
-	sound-hdmi {
-		status = "disabled";
-	};
-
 	lvds0_panel {
 		compatible = "lg,lm215wf3";
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_lvds>;
 		backlight = <&lvds_backlight>;
 		power-supply = <&lvds_bl_pwren>;
-        enable = <&gpio4 1 GPIO_ACTIVE_HIGH >;
+    enable = <&gpio4 1 GPIO_ACTIVE_HIGH >;
 		port {
 			panel_lvds_in: endpoint {
 				remote-endpoint = <&lvds_out>;
@@ -43,8 +39,4 @@
 			};
 		};
 	};
-};
-
-&lcdif3 {
-	status = "disabled";
 };
