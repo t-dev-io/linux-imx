@@ -34,6 +34,32 @@
 		      <0x1 0x00000000 0 0xc0000000>;
 	};
 
+	reg_vdcdc6_5v: regulator-vdc5v {
+		compatible = "regulator-fixed";
+		regulator-name = "vdcdc6_5v";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_vdcdc6_5v>;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpio2 9 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-boot-on;
+		regulator-always-on;
+	};
+
+	reg_otg1pwr: regulator-otg1pwr {
+		compatible = "regulator-fixed";
+		regulator-name = "otg1pwr";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_otg1pwr>;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-boot-on;
+		regulator-always-on;
+	};
+
 	reg_can1_stby: regulator-can1-stby {
 		compatible = "regulator-fixed";
 		regulator-name = "can1-stby";
@@ -177,6 +203,7 @@
 		default-brightness-level = <80>;
 	};
 
+#if 0
 	cbtl04gp {
 		compatible = "nxp,cbtl04gp";
 		pinctrl-names = "default";
@@ -190,6 +217,7 @@
 			};
 		};
 	};
+#endif
 };
 
 &flexspi {
@@ -547,6 +575,7 @@
 		};
 	};
 
+#if 0
 	ptn5110: tcpc@50 {
 		compatible = "nxp,ptn5110";
 		pinctrl-names = "default";
@@ -586,6 +615,7 @@
 			};
 		};
 	};
+#endif
 };
 
 &i2c3 {
@@ -826,7 +856,6 @@
 };
 
 &usb3_phy0 {
-	vbus-power-supply = <&ptn5110>;
 	fsl,phy-tx-vref-tune = <0xe>;
 	fsl,phy-tx-preemp-amp-tune = <3>;
 	fsl,phy-tx-vboost-level = <5>;
@@ -841,6 +870,10 @@
 };
 
 &usb_dwc3_0 {
+#if 1
+	dr_mode = "host";
+	//test host only, always enable regulator otg1pwr, if need otg use gpio extcon instand
+#else
 	dr_mode = "otg";
 	hnp-disable;
 	srp-disable;
@@ -849,13 +882,16 @@
 	role-switch-default-mode = "none";
 	snps,dis-u1-entry-quirk;
 	snps,dis-u2-entry-quirk;
+#endif
 	status = "okay";
 
+#if 0
 	port {
 		usb3_drd_sw: endpoint {
 			remote-endpoint = <&typec_dr_sw>;
 		};
 	};
+#else
 };
 
 &usb3_phy1 {
@@ -1016,6 +1052,20 @@
 		fsl,pins = <
 			MX8MP_IOMUXC_SAI5_MCLK__CAN2_RX         0x154
 			MX8MP_IOMUXC_SAI5_RXD3__CAN2_TX         0x154
+		>;
+	};
+
+	pinctrl_otg1pwr: otg1pwrgrp {
+		fsl,pins = <
+			MX8MP_IOMUXC_GPIO1_IO13__GPIO1_IO13	0x154	
+			MX8MP_IOMUXC_GPIO1_IO12__GPIO1_IO12	0x154
+		>;
+	};
+
+
+	pinctrl_vdcdc6_5v: vdcdc5vgrp {
+		fsl,pins = <
+			MX8MP_IOMUXC_SD1_DATA7__GPIO2_IO09	0x154
 		>;
 	};
 
