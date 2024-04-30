@@ -23,10 +23,8 @@
  *
  *****************************************************************************/
 
-/*Image2HeaderVersion: R3 1.5.10*/
+/*Image2HeaderVersion: R3 1.5.8*/
 #include "mp_precomp.h"
-
-#define ODM_WIN 0x08
 
 #if (DM_ODM_SUPPORT_TYPE == ODM_WIN)
 #if RT_PLATFORM == PLATFORM_MACOSX
@@ -19931,3 +19929,4 @@ odm_read_and_config_mp_8822b_txpwr_lmt_type5(struct dm_struct *dm)
 }
 
 #endif /* end of HWIMG_SUPPORT*/
+

@@ -147,3 +147,4 @@ u32 odm_get_version_mp_8822b_phy_reg_pg_type5(void);
 
 #endif
 #endif /* end of HWIMG_SUPPORT*/
+

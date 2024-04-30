@@ -38,3 +38,4 @@ bool ex_hal_sdio_multi_if_bus_available(PADAPTER adapter);
 
 #endif  /* CONFIG_SDIO_MULTI_FUNCTION_COEX */
 #endif  /* !__HAL_SDIO_COEX_H__ */
+

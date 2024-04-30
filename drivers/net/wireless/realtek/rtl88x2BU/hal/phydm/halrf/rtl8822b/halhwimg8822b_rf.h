@@ -23,7 +23,7 @@
  *
  *****************************************************************************/
 
-/*Image2HeaderVersion: R3 1.5.10*/
+/*Image2HeaderVersion: R3 1.5.8*/
 #if (RTL8822B_SUPPORT == 1)
 #ifndef __INC_MP_RF_HW_IMG_8822B_H
 #define __INC_MP_RF_HW_IMG_8822B_H
@@ -463,3 +463,4 @@ u32 odm_get_version_mp_8822b_txpwr_lmt_type5(void);
 
 #endif
 #endif /* end of HWIMG_SUPPORT*/
+

@@ -273,3 +273,4 @@ void rtl8822b_rx_report_reset(struct _ADAPTER *a, enum rx_rpt_type type)
 {
 	_rx_report(a, type, 1);
 }
+

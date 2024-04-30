@@ -217,3 +217,4 @@
 #define	ODM_BIT_BB_TX_PATH_11N			0xF
 #define	ODM_BIT_BB_ATC_11N			BIT(11)
 #endif
+

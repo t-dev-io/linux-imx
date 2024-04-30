@@ -44,7 +44,7 @@
  *	alive mechanism. PREQ's da = path dst
  * @RTW_MESH_PATH_BCAST_PREQ: for re-checking next hop resolve toward root.
  *	Use it to force path_discover sending broadcast PREQ for root.
- *
+ * 
  * RTW_MESH_PATH_RESOLVED is used by the mesh path timer to
  * decide when to stop or cancel the mesh path discovery.
  */
@@ -58,7 +58,7 @@ enum rtw_mesh_path_flags {
 	RTW_MESH_PATH_DELETED =		BIT(6),
 	RTW_MESH_PATH_ROOT_ADD_CHK =	BIT(7),
 	RTW_MESH_PATH_PEER_AKA =	BIT(8),
-	RTW_MESH_PATH_BCAST_PREQ =	BIT(9),
+	RTW_MESH_PATH_BCAST_PREQ =	BIT(9),	
 };
 
 /**
@@ -208,3 +208,4 @@ static inline void rtw_mesh_path_activate(struct rtw_mesh_path *mpath)
 void rtw_mesh_path_flush_by_iface(_adapter *adapter);
 
 #endif /* __RTW_MESH_PATHTBL_H_ */
+

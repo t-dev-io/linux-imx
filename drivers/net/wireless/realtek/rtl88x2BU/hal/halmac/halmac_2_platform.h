@@ -90,3 +90,4 @@
 typedef _mutex		HALMAC_MUTEX;
 
 #endif /* _HALMAC_2_PLATFORM_H_ */
+

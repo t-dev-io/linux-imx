@@ -142,3 +142,4 @@ void phydm_pathdiv_debug(void *dm_void, char input[][16], u32 *_used,
 
 #endif /* @#ifdef CONFIG_PATH_DIVERSITY */
 #endif /* @#ifndef  __PHYDMPATHDIV_H__ */
+
