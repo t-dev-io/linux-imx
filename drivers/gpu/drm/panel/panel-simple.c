@@ -2806,6 +2806,29 @@ static const struct panel_desc innolux_zj070na_01p = {
 	},
 };
 
+static const struct display_timing lg_lm215wf3_timing = {
+	.pixelclock = { 60000000, 72000000, 87500000 },
+	.hactive = { 1920, 1920, 1920 },
+	.hfront_porch = { 16*2, 48*2, 48*2 },
+	.hback_porch = { 32*2, 48*2, 64*2 },
+	.hsync_len = { 16, 32, 48 },
+	.vactive = { 1080, 1080, 1080},
+	.vfront_porch = { 3, 8, 32 },
+	.vback_porch = { 3, 8, 32 },
+	.vsync_len = { 2, 4, 16 },
+	.flags = DISPLAY_FLAGS_DE_HIGH,
+};
+
+static const struct panel_desc lg_lm215wf3 = {
+	.timings = &lg_lm215wf3_timing,
+	.num_timings = 1,
+	.bpc = 8,
+	.size = {
+		.width = 570,
+		.height = 315,
+	},
+};
+
 static const struct drm_display_mode ivo_m133nwf4_r0_mode = {
 	.clock = 138778,
 	.hdisplay = 1920,
@@ -4763,6 +4786,9 @@ static const struct of_device_id platform_of_match[] = {
 	}, {
 		.compatible = "innolux,zj070na-01p",
 		.data = &innolux_zj070na_01p,
+	}, {
+		.compatible = "lg,lm215wf3",
+		.data = &lg_lm215wf3,
 	}, {
 		.compatible = "ivo,m133nwf4-r0",
 		.data = &ivo_m133nwf4_r0,
