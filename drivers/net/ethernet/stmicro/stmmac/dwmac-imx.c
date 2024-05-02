@@ -287,6 +287,60 @@ imx_dwmac_parse_dt(struct imx_priv_data *dwmac, struct device *dev)
 	return err;
 }
 
+static ssize_t mac_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+    struct net_device *ndev;
+	struct stmmac_priv *priv;
+
+	ndev = dev_get_drvdata(dev);
+	priv = netdev_priv(ndev);
+	stmmac_get_umac_addr(priv, priv->hw, priv->dev->dev_addr, 0);
+    return sprintf(buf,"%02x:%02x:%02x:%02x:%02x:%02x\n", priv->dev->dev_addr[0], priv->dev->dev_addr[1],priv->dev->dev_addr[2], priv->dev->dev_addr[3], priv->dev->dev_addr[4], priv->dev->dev_addr[5]);
+}
+
+static ssize_t mac_store (struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct net_device *ndev;
+    char *ptr;
+    const char *p=buf;
+    int i = 0, ret;
+    unsigned long tmp;
+    struct sockaddr pa;
+
+	struct stmmac_priv *priv;
+	ndev = dev_get_drvdata(dev);
+	priv = netdev_priv(ndev);
+
+    while (p && (*p) && i < ETH_ALEN) {
+        ptr = strchr(p, ':');
+        if (ptr)
+            *ptr++ = '\0';
+
+        if (strlen(p)) {
+            ret = kstrtoul(p, 16, &tmp);
+            if (ret < 0 || tmp > 0xff)
+                break;
+            //make sure the mac is not multicast addr, sa_data[0]&0x01 is not ture.
+            if(i == 0)
+                pa.sa_data[i++] = tmp & 0xFE;
+            else
+                pa.sa_data[i++] = tmp;
+        }
+        p = ptr;
+    }
+
+    if(i == ETH_ALEN)
+    {
+		eth_commit_mac_addr_change(ndev, &pa);
+		stmmac_set_umac_addr(priv, priv->hw, ndev->dev_addr, 0);
+    }
+
+	return size;
+}
+
+static DEVICE_ATTR(mac, S_IRUGO | S_IWUSR, mac_show, mac_store);
+
+
 static int imx_dwmac_probe(struct platform_device *pdev)
 {
 	struct plat_stmmacenet_data *plat_dat;
@@ -342,6 +396,10 @@ static int imx_dwmac_probe(struct platform_device *pdev)
 	ret = stmmac_dvr_probe(&pdev->dev, plat_dat, &stmmac_res);
 	if (ret)
 		goto err_drv_probe;
+
+    ret = device_create_file(&pdev->dev, &dev_attr_mac);
+	if (ret)
+		printk("could not create file attrbute: mac  \n");
 
 	return 0;
 

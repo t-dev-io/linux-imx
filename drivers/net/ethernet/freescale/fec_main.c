@@ -3831,6 +3831,59 @@ out:
 	return ret;
 }
 
+static ssize_t mac_show(struct device *dev,struct device_attribute *attr,char* buf)
+{
+    return sprintf(buf,"%x:%x:%x:%x:%x:%x\n", macaddr[0], macaddr[1],macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
+}
+
+static ssize_t mac_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t size)
+{
+    char *ptr;
+    const char *p=buf;
+    int i = 0, j, ret;
+    unsigned long tmp;
+    struct sockaddr pa;
+    struct net_device *ndev;
+    struct platform_device *pdev;
+
+    pdev = container_of(dev, struct platform_device, dev);
+    ndev = platform_get_drvdata(pdev);
+
+    //*p = *buf;
+
+    while (p && (*p) && i < ETH_ALEN) {
+        ptr = strchr(p, ':');
+        if (ptr)
+            *ptr++ = '\0';
+
+        if (strlen(p)) {
+            ret = kstrtoul(p, 16, &tmp);
+            if (ret < 0 || tmp > 0xff)
+                break;
+            //make sure the mac is not multicast addr, sa_data[0]&0x01 is not ture.
+            if(i == 0)
+                pa.sa_data[i++] = tmp & 0xFE;
+            else
+                pa.sa_data[i++] = tmp;
+        }
+        p = ptr;
+    }
+
+    if(i == ETH_ALEN)
+    {
+        for (j = 0; j < ETH_ALEN; j++)
+        {
+            macaddr[j] = pa.sa_data[j];
+            //printk("macaddr-%d=%x,%x\n",j, macaddr[j],pa.sa_data[j]);
+        }
+        fec_set_mac_address(ndev, &pa);
+    }
+
+    return size;
+}
+
+static DEVICE_ATTR(mac, S_IRUGO | S_IWUSR, mac_show, mac_store);
+
 static int
 fec_probe(struct platform_device *pdev)
 {
@@ -4070,6 +4123,10 @@ fec_probe(struct platform_device *pdev)
 
 	fep->rx_copybreak = COPYBREAK_DEFAULT;
 	INIT_WORK(&fep->tx_timeout_work, fec_enet_timeout_work);
+
+    ret = device_create_file(&pdev->dev, &dev_attr_mac);
+    if (ret)
+        printk("could not create file attrbute: mac\n");
 
 	pm_runtime_mark_last_busy(&pdev->dev);
 	pm_runtime_put_autosuspend(&pdev->dev);
