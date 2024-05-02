@@ -78,9 +78,11 @@
 	status = "disabled";
 };
 
+#if 0
 &codec {
 	status = "disabled";
 };
+#endif
 
 &sai3 {
 	status = "disabled";
