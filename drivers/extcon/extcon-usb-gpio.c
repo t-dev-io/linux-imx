@@ -86,7 +86,7 @@ static void usb_extcon_detect_cable(struct work_struct *work)
 		}
 	}
 
-	if (id) {
+	if (id)
 		extcon_set_state_sync(info->edev, EXTCON_USB_HOST, false);
 	if (!vbus)
 		extcon_set_state_sync(info->edev, EXTCON_USB, false);
