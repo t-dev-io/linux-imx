@@ -544,7 +544,7 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_codec_int_b>;
 		reg = <0x1c>;
-		clocks = <&audiomix_clk IMX8MP_CLK_AUDIOMIX_SAI3_MCLK1>;
+		clocks = <&audio_blk_ctrl IMX8MP_CLK_AUDIOMIX_SAI3_MCLK1>;
 		clock-names = "mclk";
 		interrupt-parent = <&gpio4>;
 		interrupts = <29 GPIO_ACTIVE_LOW>;
