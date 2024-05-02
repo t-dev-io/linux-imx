@@ -968,7 +968,7 @@
 			remote-endpoint = <&typec_dr_sw>;
 		};
 	};
-#else
+#endif
 };
 
 &usb3_phy1 {
