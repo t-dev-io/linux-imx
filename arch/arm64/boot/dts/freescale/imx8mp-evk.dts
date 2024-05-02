@@ -342,6 +342,7 @@
 	status = "okay";/* can2 pin conflict with pdm */
 };
 
+#if 0
 &A53_0 {
 	// cpu-supply = <&buck2>;
 };
@@ -357,6 +358,7 @@
 &A53_3 {
 	cpu-supply = <&buck2>;
 };
+#endif
 
 &dsp {
 	status = "okay";
@@ -955,8 +957,8 @@
 };
 
 &usb_dwc3_1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_usb1_vbus>;
+	// pinctrl-names = "default";
+	// pinctrl-0 = <&pinctrl_usb1_vbus>;
 	dr_mode = "host";
 	status = "okay";
 };
